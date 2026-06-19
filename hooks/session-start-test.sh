@@ -25,12 +25,12 @@ if (hasJq) {
     throw new Error(`expected IMPORTANT priority, got ${payload.priority}`);
   }
 
-  if (!payload.message.includes('agent-skills loaded.')) {
+  if (!payload.message.includes('lucas-harness loaded.')) {
     throw new Error('message is missing startup preface');
   }
 
-  if (!payload.message.includes('# Using Agent Skills')) {
-    throw new Error('message is missing using-agent-skills content');
+  if (!payload.message.includes('# Using Lucas Harness')) {
+    throw new Error('message is missing using-lucas-harness content');
   }
 } else {
   if (payload.priority !== 'INFO') {
