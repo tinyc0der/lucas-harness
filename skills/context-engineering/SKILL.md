@@ -85,6 +85,43 @@ Load the relevant spec section when starting a feature. Don't load the entire sp
 
 **Wasteful:** "Here's our entire 5000-word spec: [full spec]" (when only working on auth)
 
+#### Workflow Artifacts (canonical map)
+
+The skills and workflow commands read and write durable markdown artifacts. This is the single
+source of truth for where every one of them lives — skills and commands reference this map; they do
+**not** invent their own paths. Artifacts fall into three tiers by lifespan:
+
+```
+docs/
+  intent/<topic>.md      ← interview-me            ┐ Define phase — GLOBAL, pre-feature
+  ideas/<idea>.md        ← idea-refine             ┘ (no branch exists yet)
+
+  specs/<slug>/          ← one directory per feature; slug = the current git branch name
+    spec.md              ← /spec   (spec-driven-development)   ┐ PER-FEATURE — scoped so
+    plan.md              ← /plan   (planning-and-task-breakdown)│ multiple features can be
+    review.md            ← /review (code-review-and-quality)   │ in flight at once
+    ship.md              ← /ship   (shipping-and-launch)       ┘
+
+  decisions/NNNN-*.md    ← documentation-and-adrs  ┐ Cross-cutting — GLOBAL, outlive any
+  migrations/<name>.md   ← deprecation-and-migration│ one feature (deprecation notices live
+  runbooks/<alert>.md    ← observability-and-instrumentation   │ with their migration guide)
+CHANGELOG.md             ← documentation-and-adrs  ┘ (repo root, conventional location)
+```
+
+**Feature-slug resolution (branch-name mapping)** — for the per-feature tier only:
+- The slug is the **current git branch name**, sanitized to kebab-case (strip a leading
+  `feature/`, `claude/`, or similar prefix). Branch `feature/user-auth` → `docs/specs/user-auth/`.
+- One feature per branch. If you're on the default branch (`main`/`master`), create a feature
+  branch *before* `/spec` — don't write feature artifacts onto the trunk.
+- **To resolve the active feature when reading:** use the directory matching the current branch;
+  if none exists and there is exactly one feature directory, use it; otherwise ask the user.
+
+**Why three tiers.** Intent and ideas come *before* a feature branch exists, so they can't be
+feature-scoped — they're global. ADRs, migration guides, runbooks, and the changelog *outlive* the
+feature that prompted them (an architectural decision or an on-call runbook is consulted long after
+the branch merges), so they're global too. Only the spec→ship lifecycle is per-feature, because
+that's the work that's genuinely concurrent across branches.
+
 ### Level 3: Relevant Source Files
 
 Before editing a file, read it. Before implementing a pattern, find an existing example in the codebase.

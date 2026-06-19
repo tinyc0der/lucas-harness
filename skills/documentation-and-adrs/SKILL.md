@@ -35,7 +35,7 @@ ADRs capture the reasoning behind significant technical decisions. They're the h
 
 ### ADR Template
 
-Store ADRs in `docs/decisions/` with sequential numbering:
+Store ADRs in `docs/decisions/` with sequential numbering. ADRs are global, not feature-scoped — a decision outlives the feature that prompted it (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`):
 
 ```markdown
 # ADR-001: Use PostgreSQL for primary database
@@ -220,7 +220,7 @@ How to contribute, coding standards, PR process.
 
 ## Changelog Maintenance
 
-For shipped features:
+Keep the changelog at the repo root as `CHANGELOG.md` — it's a single global, user-facing log across all features, not a per-feature artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). For shipped features:
 
 ```markdown
 # Changelog

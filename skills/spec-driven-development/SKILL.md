@@ -114,6 +114,8 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 [Anything unresolved that needs human input]
 ```
 
+**Where the spec lives.** Save it to `docs/specs/<slug>/spec.md`, one directory per feature, where `<slug>` is the current git branch name. This is what lets multiple features have specs in flight at once instead of contending for a single root file. See the Workflow Artifacts map in `skills/context-engineering/SKILL.md` (`context-engineering`) for the full layout and slug-resolution rule; the plan (Phase 2) and task ledger (Phase 3) land alongside it as `docs/specs/<slug>/plan.md`.
+
 **Reframe instructions as success criteria.** When receiving vague requirements, translate them into concrete conditions:
 
 ```

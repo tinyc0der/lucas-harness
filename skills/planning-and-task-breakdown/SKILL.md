@@ -142,6 +142,8 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 
 ## Plan Document Template
 
+Save the plan to `docs/specs/<slug>/plan.md`, one directory per feature, where `<slug>` is the current git branch name (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md` for the layout and slug-resolution rule). This is a **single document** that is the one source of truth for both the tasks and their status — do not split status into a separate `todo.md`. Each task is a `- [ ]` checkbox; the implementer flips it to `- [x]` as the task completes, so the ledger and the work stay in one place.
+
 ```markdown
 # Implementation Plan: [Feature/Project Name]
 

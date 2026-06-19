@@ -76,6 +76,8 @@ Don't deprecate without a working alternative. The replacement must:
 
 ### Step 2: Announce and Document
 
+Save the deprecation notice and its migration guide together as `docs/migrations/<name>.md` (e.g. `docs/migrations/old-service-to-new-service.md`). This is a global, cross-cutting artifact — it's consumed by users over many releases and outlives the feature branch that introduced the replacement (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). Link to it from the `CHANGELOG.md` entry.
+
 ```markdown
 ## Deprecation Notice: OldService
 
