@@ -11,7 +11,7 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
 ## Task List
 
 ### Phase 1: Metadata & Setup
-- [ ] **Task 1: Update plugin and marketplace metadata**
+- [x] **Task 1: Update plugin and marketplace metadata**
   - **Description:** Update the plugin name and links in plugin and marketplace configurations.
   - **Acceptance criteria:**
     - `plugin.json` name updated to `"lucas-harness"`.
@@ -26,7 +26,7 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
     - `.claude-plugin/marketplace.json`
   - **Estimated scope:** XS (3 files)
 
-- [ ] **Task 2: Rename meta-skill directory and update content**
+- [x] **Task 2: Rename meta-skill directory and update content**
   - **Description:** Rename the directory `skills/using-agent-skills/` to `skills/using-lucas-harness/` and update its content.
   - **Acceptance criteria:**
     - Folder renamed to `using-lucas-harness`.
@@ -39,10 +39,10 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
   - **Estimated scope:** XS (1 folder/file renamed)
 
 ### Checkpoint: Metadata & Setup
-- [ ] Plugin files updated and meta-skill directory renamed successfully.
+- [x] Plugin files updated and meta-skill directory renamed successfully.
 
 ### Phase 2: Refactoring Scripts & Commands
-- [ ] **Task 3: Update hook scripts and regression tests**
+- [x] **Task 3: Update hook scripts and regression tests**
   - **Description:** Update references to the meta-skill path and name in hooks, tests, and validator scripts.
   - **Acceptance criteria:**
     - `hooks/session-start.sh` references `using-lucas-harness`.
@@ -57,7 +57,7 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
     - `scripts/validate-skills.js`
   - **Estimated scope:** S (3 files)
 
-- [ ] **Task 4: Update Claude command definitions and AGENTS.md**
+- [x] **Task 4: Update Claude command definitions and AGENTS.md**
   - **Description:** Update prefix and namespace definitions for all commands and agent configurations.
   - **Acceptance criteria:**
     - All occurrences of `agent-skills:` replaced with `lucas-harness:`.
@@ -77,10 +77,10 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
   - **Estimated scope:** M (8 files)
 
 ### Checkpoint: Refactoring
-- [ ] Regression tests run and all command prefixes updated.
+- [x] Regression tests run and all command prefixes updated.
 
 ### Phase 3: Documentation & Actions
-- [ ] **Task 5: Update documentation and GitHub workflows**
+- [x] **Task 5: Update documentation and GitHub workflows**
   - **Description:** Rename all markdown documentation references and GitHub integration actions to use the new name and URLs.
   - **Acceptance criteria:**
     - Replace references to `addyosmani/agent-skills` and `agent-skills` with `tinyc0der/lucas-harness` and `lucas-harness`.
@@ -105,8 +105,8 @@ Rename the plugin from `agent-skills` to `lucas-harness` across the entire codeb
   - **Estimated scope:** L (13 files)
 
 ### Checkpoint: Complete
-- [ ] No occurrences of `agent-skills` (except potentially in historical changelogs if any, but clean break preferred) remain.
-- [ ] All installation commands, repos, and paths renamed to `lucas-harness`.
+- [x] No occurrences of `agent-skills` (except potentially in historical changelogs if any, but clean break preferred) remain.
+- [x] All installation commands, repos, and paths renamed to `lucas-harness`.
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |

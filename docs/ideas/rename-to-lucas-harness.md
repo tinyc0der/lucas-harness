@@ -12,9 +12,9 @@ Execute a complete, breaking rename. This includes:
 5.  **Hooks & Scripts:** Update paths, messages, and validation keys in `hooks/session-start.sh`, `hooks/session-start-test.sh`, and `scripts/validate-skills.js`.
 
 ## Key Assumptions to Validate
-- [ ] Runtimes using this repository load it as `lucas-harness` without issues.
-- [ ] No hardcoded dependencies on the name `agent-skills` remain in scripts or tests.
-- [ ] Renaming `skills/using-agent-skills/` to `skills/using-lucas-harness/` does not break any local CLI path resolution.
+- [x] Runtimes using this repository load it as `lucas-harness` without issues.
+- [x] No hardcoded dependencies on the name `agent-skills` remain in scripts or tests.
+- [x] Renaming `skills/using-agent-skills/` to `skills/using-lucas-harness/` does not break any local CLI path resolution.
 
 ## MVP Scope
 - All text references updated.
