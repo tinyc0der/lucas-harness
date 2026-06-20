@@ -43,7 +43,7 @@ agy plugin list
 
 ## Slash Commands
 
-The plugin registers 9 custom slash commands: 7 lifecycle commands, the `/webperf` specialist audit, and the `/ultra` ticket router:
+The plugin registers 8 custom slash commands: 7 lifecycle commands and the `/webperf` specialist audit:
 
 | Command | What it does | Activated Skill |
 |---------|--------------|-----------------|
@@ -55,7 +55,6 @@ The plugin registers 9 custom slash commands: 7 lifecycle commands, the `/webper
 | `/code-simplify` | Reduce complexity without changing behavior | `code-simplification` |
 | `/ship` | Pre-launch checklist via parallel persona fan-out | `shipping-and-launch` |
 | `/webperf` | Audit browser-facing apps for Core Web Vitals and performance issues | `web-performance-auditor` |
-| `/ultra` | Classify a ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatch the calibrated flow | (router — dispatches the commands above) |
 
 Each command automatically invokes the corresponding skill and guides the agent step-by-step.
 

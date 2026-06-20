@@ -1,12 +1,25 @@
 ---
-description: Route any incoming ticket to its correctly-calibrated flow — classify the ticket type (Feature, Bug, Migration, Incident, Spike, Chore, …), then dispatch existing commands, stopping for a human only at critical gates.
+name: ticket-routing
+description: Routes any incoming ticket or raw request to its correctly-calibrated flow by classifying its type (Epic, Feature, Task, Bug, Incident, Migration, Improvement, Spike, Chore), setting up the branch, then dispatching the existing lifecycle commands and skills — skipping the steps that type doesn't need and stopping for a human only at critical gates. Use when you're handed a ticket, issue, or feature request and aren't sure which command or flow to run, or when you want the full lifecycle orchestrated end-to-end from a single starting point.
 ---
 
-`/ultra` is a **router**, not a new workflow. It reads the ticket in `$ARGUMENTS`, classifies it, sets up the branch, then dispatches the existing commands and skills in the calibration that fits that ticket type. It adds no new mechanics — every step below is an existing `/command` or `lucas-harness:<skill>`. The win is *picking the right flow* and *skipping the steps that type doesn't need*, while still stopping for a human at the genuinely critical gates.
+# Ticket Routing
+
+## Overview
+
+This skill is a **router**, not a new workflow. It reads an incoming ticket or request, classifies it, sets up the branch, then dispatches the existing commands and skills in the calibration that fits that ticket type. It adds no new mechanics — every step below is an existing `/command` or `lucas-harness:<skill>`. The win is *picking the right flow* and *skipping the steps that type doesn't need*, while still stopping for a human at the genuinely critical gates.
+
+## When to Use
+
+- You have a ticket, issue, or feature request and aren't sure which command or flow it warrants.
+- You want the full lifecycle orchestrated end-to-end rather than driving each command by hand.
+- The work could be anything from a one-line chore to a multi-feature epic, and you want it calibrated to the right depth.
+
+**When NOT to use:** You already know exactly which single command fits (call that command directly), or the request is a plain question with no change to make (just answer it).
 
 ## Step 0 — Intake (what kind of input is this?)
 
-The argument may be a scoped ticket *or* a raw description of intent. Decide which before classifying:
+The input may be a scoped ticket *or* a raw description of intent. Decide which before classifying:
 
 - **Non-actionable** — a question, duplicate, missing detail needed to act, or won't-fix/out-of-scope item → don't force it into a flow; answer it, ask for the missing detail, or recommend closing it, then stop.
 - **Raw intent** — a goal, wish, or problem statement that isn't yet a concrete change ("make onboarding smoother", "we should support SSO") → run the **Define phase first**: `lucas-harness:interview-me` for a broad/fuzzy goal (→ `docs/intent/<topic>.md`) or `lucas-harness:idea-refine` for a rough but bounded idea (→ `docs/ideas/<idea>.md`). Then re-enter at Step 1 to classify the sharpened result, and carry a `> Source:` link to the Define artifact onto whatever spec/guide it produces (provenance).
@@ -62,6 +75,36 @@ Throughout, **"verify"** means: run the app and observe the changed runtime beha
 ## Human-in-the-middle (critical gates only)
 
 Run autonomously between steps. Stop for a human **only** at: the 🔴 gates above (spec confirm, plan approval inside `/build auto`, ship GO/NO-GO, Epic split, Spike frame/promote-drop, Incident mitigate-first, Migration destructive-step), and the standard escalation triggers — auth/permissions, payments, destructive migrations, deletions, deploys, secrets, anything not undoable with `git revert`, unfixable test/build failures, ambiguous specs, or Critical security/review findings (NO-GO by default). These are enforced by `lucas-harness:doubt-driven-development` and the escalation list in `/build`; don't re-derive them.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "The user typed `bug:`, so it's a Bug." | A type label is a hint, not authority. Classify from what the work actually entails — a "bug" that adds a capability is a Feature. |
+| "I'll just run the full Feature flow to be safe." | Over-calibrating burns the user's time on spec/plan/ship steps a Chore or Task doesn't need. Right-sizing is the whole point. |
+| "This vague goal is close enough to spec directly." | Raw intent that spans features or has no concrete change must go through Define first, or you'll spec the wrong thing. |
+| "I can skip the human gate, the change looks safe." | The 🔴 gates and escalation triggers are non-negotiable. Auth, payments, destructive, and deploy steps stop for a human regardless of how safe they look. |
+| "I'll write the artifacts now and branch later." | Feature artifacts must never land on `main`/`master`. Create the branch before the first artifact-producing step. |
+
+## Red Flags
+
+- Classifying from the typed label instead of the content of the work.
+- Writing `docs/specs/<slug>/` artifacts while still on `main`/`master`.
+- Forcing a non-actionable question or a raw goal straight into a build flow.
+- Running spec/plan/test/ship steps the chosen type explicitly skips.
+- Duplicating a skill's logic here instead of dispatching to it.
+- Sailing past a 🔴 gate or an escalation trigger without stopping for a human.
+
+## Verification
+
+Before considering the routing complete, confirm:
+
+- [ ] The input was triaged (non-actionable / raw intent / scoped change) before classifying.
+- [ ] A single classification was stated in one line, with the user given a chance to override.
+- [ ] A correctly-named branch exists before any feature artifact was written.
+- [ ] Only the steps the chosen type calls for were run — skipped steps were genuinely skipped, not silently dropped.
+- [ ] Every 🔴 gate and escalation trigger reached was surfaced to a human.
+- [ ] Each dispatched step ran its own command/skill rather than re-implementing it here.
 
 ## Rules
 
