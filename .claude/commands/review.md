@@ -2,7 +2,7 @@
 description: Conduct a five-axis code review — correctness, readability, architecture, security, performance
 ---
 
-Invoke the agent-skills:code-review-and-quality skill.
+Invoke the lucas-harness:code-review-and-quality skill.
 
 Review the current changes (staged or recent commits) across all five axes:
 
@@ -14,3 +14,5 @@ Review the current changes (staged or recent commits) across all five axes:
 
 Categorize findings as Critical, Important, or Suggestion.
 Output a structured review with specific file:line references and fix recommendations.
+
+Persist the review to `docs/specs/<slug>/review.md` (resolve `<slug>` from the current git branch — see the Workflow Artifacts map in the `context-engineering` skill) so it survives the session, gives the feature an audit trail, and can be consumed by `/ship`. If no feature directory resolves (e.g. an ad-hoc review outside the workflow), report inline instead.

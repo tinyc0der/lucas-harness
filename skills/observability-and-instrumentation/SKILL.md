@@ -150,7 +150,7 @@ Cause-based alerts fire when nothing is wrong and miss failures you didn't predi
 Rules for every alert you create:
 
 1. **It must be actionable.** If the response is "ignore it, it self-heals", delete the alert.
-2. **It links to a runbook** — even three lines: what it means, first query to run, escalation path.
+2. **It links to a runbook** — even three lines: what it means, first query to run, escalation path. Store runbooks as `docs/runbooks/<alert>.md` — a global, cross-cutting artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
 3. **It has a threshold and duration** justified by the SLO or by historical data, not by a guess.
 4. Use two severities only: **page** (user-facing, act now) and **ticket** (degradation, act this week). A third tier becomes noise that trains people to ignore everything.
 

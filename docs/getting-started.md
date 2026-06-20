@@ -1,6 +1,6 @@
-# Getting Started with agent-skills
+# Getting Started with lucas-harness
 
-agent-skills works with any AI coding agent that accepts Markdown instructions. This guide covers the universal approach. For tool-specific setup, see the dedicated guides.
+lucas-harness works with any AI coding agent that accepts Markdown instructions. This guide covers the universal approach. For tool-specific setup, see the dedicated guides.
 
 ## How Skills Work
 
@@ -13,7 +13,7 @@ Each skill is a Markdown file (`SKILL.md`) that describes a specific engineering
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/addyosmani/agent-skills.git
+git clone https://github.com/tinyc0der/lucas-harness.git
 ```
 
 ### 2. Choose a skill
@@ -37,7 +37,7 @@ Copy the relevant `SKILL.md` content into your agent's system prompt, rules file
 
 ### 4. Use the meta-skill for discovery
 
-Start with the `using-agent-skills` skill loaded. It contains a flowchart that maps task types to the appropriate skill.
+Start with the `using-lucas-harness` skill loaded. It contains a flowchart that maps task types to the appropriate skill.
 
 ## Recommended Setup
 
@@ -131,11 +131,25 @@ Load a reference when you need detailed patterns beyond what the skill covers.
 
 ## Spec and task artifacts
 
-The `/spec` and `/plan` commands create working artifacts (`SPEC.md`, `tasks/plan.md`, `tasks/todo.md`). Treat them as **living documents** while the work is in progress:
+Skills and commands write durable markdown artifacts in three tiers by lifespan. The core of the lifecycle is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the current git branch name — this lets multiple features have specs in flight at once instead of contending for a single root file. The bookends are **global**:
+
+| Tier | Source | Artifact |
+|------|--------|----------|
+| Define (global, pre-feature) | interview-me | `docs/intent/<topic>.md` |
+| Define (global, pre-feature) | idea-refine | `docs/ideas/<idea-name>.md` |
+| Per-feature | `/spec` | `docs/specs/<slug>/spec.md` |
+| Per-feature | `/plan` | `docs/specs/<slug>/plan.md` (single ledger — tasks and status together) |
+| Per-feature | `/review` | `docs/specs/<slug>/review.md` |
+| Per-feature | `/ship` | `docs/specs/<slug>/ship.md` |
+| Cross-cutting (global) | documentation-and-adrs | `docs/decisions/NNNN-*.md`, `CHANGELOG.md` |
+| Cross-cutting (global) | deprecation-and-migration | `docs/migrations/<name>.md` |
+| Cross-cutting (global) | observability-and-instrumentation | `docs/runbooks/<alert>.md` |
+
+The Define-phase artifacts come *before* a branch exists, and the cross-cutting ones *outlive* the feature that prompted them — so neither is feature-scoped. The full map and slug-resolution rule live in the `context-engineering` skill. Treat these as **living documents** while the work is in progress:
 
 - Keep them in version control during development so the human and the agent have a shared source of truth.
 - Update them when scope or decisions change.
-- If your repo doesn’t want these files long‑term, delete them before merge or add the folder to `.gitignore` — the workflow doesn’t require them to be permanent.
+- If your repo doesn’t want a feature’s artifacts long‑term, delete its `docs/specs/<slug>/` folder before merge or add it to `.gitignore` — the workflow doesn’t require them to be permanent.
 
 ## Tips
 

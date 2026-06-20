@@ -84,6 +84,8 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 ```markdown
 # Spec: [Project/Feature Name]
 
+> Source: docs/ideas/<idea-name>.md (and docs/intent/<topic>.md if one exists)
+
 ## Objective
 [What we're building and why. User stories or acceptance criteria.]
 
@@ -113,6 +115,10 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 ## Open Questions
 [Anything unresolved that needs human input]
 ```
+
+**Where the spec lives.** Save it to `docs/specs/<slug>/spec.md`, one directory per feature, where `<slug>` is the current git branch name. This is what lets multiple features have specs in flight at once instead of contending for a single root file. See the Workflow Artifacts map in `skills/context-engineering/SKILL.md` (`context-engineering`) for the full layout and slug-resolution rule; the plan (Phase 2) and task ledger (Phase 3) land alongside it as `docs/specs/<slug>/plan.md`.
+
+If this spec grew out of a refined idea or intent statement, add the `> Source:` line shown in the template above (omit it for a spec written cold). Those Define-phase artifacts stay global rather than moving into the feature directory — see "Provenance, not relocation" in the Workflow Artifacts map for why.
 
 **Reframe instructions as success criteria.** When receiving vague requirements, translate them into concrete conditions:
 

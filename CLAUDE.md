@@ -1,6 +1,6 @@
-# agent-skills
+# lucas-harness
 
-This is the agent-skills project — a collection of production-grade engineering skills for AI coding agents.
+This is the lucas-harness project — a collection of production-grade engineering skills for AI coding agents.
 
 ## Project Structure
 
@@ -21,6 +21,16 @@ docs/         → Setup guides for different tools
 **Verify:** browser-testing-with-devtools, debugging-and-error-recovery
 **Review:** code-review-and-quality, code-simplification, security-and-hardening, performance-optimization
 **Ship:** git-workflow-and-versioning, ci-cd-and-automation, deprecation-and-migration, documentation-and-adrs, observability-and-instrumentation, shipping-and-launch
+
+## Upstream Merge Guide
+
+This repository is a renamed fork of the upstream repository [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills). 
+
+When merging updates from upstream:
+- **Folder Names:** Upstream `skills/using-agent-skills` maps to `skills/using-lucas-harness`.
+- **Command Namespace:** Upstream prefix `agent-skills:` must be replaced with `lucas-harness:`.
+- **Plugin Metadata:** Any references to `agent-skills` or `addy-agent-skills` in configuration files (e.g., `plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) must remain `lucas-harness`.
+- **Documentation:** General occurrences of `Agent Skills` and upstream git URLs should be replaced with `Lucas Harness` and `tinyc0der/lucas-harness` respectively.
 
 ## Conventions
 

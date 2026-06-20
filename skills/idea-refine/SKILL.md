@@ -29,12 +29,14 @@ bash /mnt/skills/user/idea-refine/scripts/idea-refine.sh
 
 ## Output
 
-The final output is a markdown one-pager saved to `docs/ideas/[idea-name].md` (after user confirmation), containing:
+The final output is a markdown one-pager saved to `docs/ideas/<idea-name>.md` (after user confirmation), containing:
 - Problem Statement
 - Recommended Direction
 - Key Assumptions
 - MVP Scope
 - Not Doing list
+
+If this idea came out of an `interview-me` session, add a `> Source: docs/intent/<topic>.md` line at the top so the intent → idea → spec trail stays linkable. Downstream, `spec-driven-development` adds the same kind of line pointing back here.
 
 ## Detailed Instructions
 
@@ -137,7 +139,7 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
-Ask the user if they'd like to save this to `docs/ideas/[idea-name].md` (or a location of their choosing). Only save if they confirm.
+Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a location of their choosing). Only save if they confirm — it's a global Define-phase artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
 
 ### Anti-patterns to Avoid
 

@@ -2,7 +2,7 @@
 description: Run the pre-launch checklist via parallel fan-out to specialist personas, then synthesize a go/no-go decision
 ---
 
-Invoke the agent-skills:shipping-and-launch skill.
+Invoke the lucas-harness:shipping-and-launch skill.
 
 `/ship` is a **fan-out orchestrator**. It runs three specialist personas in parallel against the current change, then merges their reports into a single go/no-go decision with a rollback plan. The personas operate independently — no shared state, no ordering — which is what makes parallel execution safe and useful here.
 
@@ -27,7 +27,7 @@ Constraints (from Claude Code's subagent model):
 
 ## Phase B — Merge in main context
 
-Once all three reports are back, the main agent (not a sub-persona) synthesizes them:
+Once all three reports are back, the main agent (not a sub-persona) synthesizes them. If a prior `/review` persisted `docs/specs/<slug>/review.md` for the active feature (resolve `<slug>` from the current git branch — see the Workflow Artifacts map in the `context-engineering` skill), fold its findings in too rather than re-deriving them.
 
 1. **Code Quality** — Aggregate Critical/Important findings from `code-reviewer` and any failing tests, lint, or build output. Resolve duplicates between reviewers.
 2. **Security** — Promote any Critical/High `security-auditor` findings to launch blockers. Cross-reference with `code-reviewer`'s security axis.
@@ -62,6 +62,8 @@ Produce a single output:
 - [security-auditor report]
 - [test-engineer report]
 ```
+
+Persist this decision to `docs/specs/<slug>/ship.md` so the go/no-go call and its rollback plan are auditable after the session. If no feature directory resolves (an ad-hoc ship check outside the workflow), report inline instead.
 
 ## Rules
 
