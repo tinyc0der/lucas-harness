@@ -4,13 +4,19 @@ description: Route any incoming ticket to its correctly-calibrated flow — clas
 
 `/ultra` is a **router**, not a new workflow. It reads the ticket in `$ARGUMENTS`, classifies it, sets up the branch, then dispatches the existing commands and skills in the calibration that fits that ticket type. It adds no new mechanics — every step below is an existing `/command` or `lucas-harness:<skill>`. The win is *picking the right flow* and *skipping the steps that type doesn't need*, while still stopping for a human at the genuinely critical gates.
 
-## Step 0 — Triage (is this actionable work?)
+## Step 0 — Intake (what kind of input is this?)
 
-Before classifying, confirm the ticket is buildable engineering work. If it's a **question**, a **duplicate**, **missing detail** needed to act, or a **won't-fix / out-of-scope** item, don't force it into a flow — answer it, ask for the missing detail, or recommend closing it, then stop. Only proceed to Step 1 once there's actionable work.
+The argument may be a scoped ticket *or* a raw description of intent. Decide which before classifying:
+
+- **Non-actionable** — a question, duplicate, missing detail needed to act, or won't-fix/out-of-scope item → don't force it into a flow; answer it, ask for the missing detail, or recommend closing it, then stop.
+- **Raw intent** — a goal, wish, or problem statement that isn't yet a concrete change ("make onboarding smoother", "we should support SSO") → run the **Define phase first**: `lucas-harness:interview-me` for a broad/fuzzy goal (→ `docs/intent/<topic>.md`) or `lucas-harness:idea-refine` for a rough but bounded idea (→ `docs/ideas/<idea>.md`). Then re-enter at Step 1 to classify the sharpened result, and carry a `> Source:` link to the Define artifact onto whatever spec/guide it produces (provenance).
+- **Scoped change** — already concrete enough to name the work → go straight to Step 1.
+
+Don't over-trigger Define: most natural-language descriptions ("the dashboard feels slow" → a perf Improvement) are concrete enough to classify directly. Refine first only when the input is genuinely too broad (spans multiple features) or too fuzzy (a wish with no concrete change in mind) to classify with confidence.
 
 ## Step 1 — Classify (explicit and overridable)
 
-Classify from the **content** of the ticket — judge what the work actually entails, not any type label the user typed. A prefix like `bug:` is a hint at most, never authoritative: a ticket tagged "bug" that adds a new capability is a **Feature**, and one tagged "task" that needs a destructive migration escalates. Match the description against the signals below, then **state your classification in one line and proceed**; the user can correct it. When the content genuinely fits two types, ask.
+Classify from the **content** of the ticket — judge what the work actually entails, not any type label the user typed. A prefix like `bug:` is a hint at most, never authoritative: a ticket tagged "bug" that adds a new capability is a **Feature**, and one tagged "task" that needs a destructive migration escalates. Match the description against the signals below, then **state your classification in one line and proceed**; the user can correct it. When the content genuinely fits two types, ask. If Step 0 refined raw intent, classify the sharpened result — a broad goal typically lands as an **Epic**, a sharpened single idea as a **Feature**.
 
 | Type | Signal |
 |------|--------|
@@ -37,7 +43,7 @@ All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the cu
 
 Throughout, **"verify"** means: run the app and observe the changed runtime behavior — invoke `lucas-harness:browser-testing-with-devtools` for browser surfaces, otherwise smoke-test the app directly. It is distinct from `/test` (unit/integration tests) and from `/ship`'s static review fan-out. 🔴 marks a deliberate human gate.
 
-- **Epic** — `lucas-harness:interview-me` → write intent to `docs/intent/<topic>.md` → 🔴 **approve the split** into features → run the **Feature** flow below for each child feature on its own branch → finish with an integration **verify** across the assembled features. *Skips:* one mega spec/plan/ship.
+- **Epic** — `lucas-harness:interview-me` → write intent to `docs/intent/<topic>.md` (reuse the intent doc if Step 0 already produced one — don't re-interview) → 🔴 **approve the split** into features → run the **Feature** flow below for each child feature on its own branch → finish with an integration **verify** across the assembled features. *Skips:* one mega spec/plan/ship.
 - **Feature** — `/spec` (🔴 confirm spec) → `/build auto` (🔴 approve plan — the gate lives inside `build auto`) → **verify** if the ticket has runtime surface → `/ship` (🔴 GO/NO-GO). *Skips:* `/plan` and `/test` — both run inside `/build auto`.
 - **Task** — `/build` (single task) → **verify** if it has runtime surface. The child rides the parent feature's `/ship`. *Skips:* spec, plan, `/test`, full ship. No human gate unless an escalation trigger fires.
 - **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → ship. *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop. (If it's live in production, route to **Incident** instead.)
