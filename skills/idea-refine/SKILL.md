@@ -139,7 +139,7 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
-Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a location of their choosing). Only save if they confirm. This is a Define-phase artifact — global and pre-feature, since no branch exists yet; see the Workflow Artifacts map in `skills/context-engineering/SKILL.md` for how it relates to the downstream spec.
+Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a location of their choosing). Only save if they confirm — it's a global Define-phase artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
 
 ### Anti-patterns to Avoid
 

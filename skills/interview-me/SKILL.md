@@ -135,7 +135,7 @@ This is a checkable test, not a vibe. It also has a floor: if you've gone severa
 
 The output of this skill is a **confirmed statement of intent**: the restate from Step 4, with an explicit yes from Step 5. That's the deliverable. Specs, plans, and task lists are downstream; they consume the intent this skill produces.
 
-If the user wants the intent to persist (a multi-session project, a handoff to another collaborator), offer to save it to `docs/intent/<topic>.md`. Only save if they confirm. This is the earliest Define-phase artifact — global and pre-feature, since no branch exists yet; see the Workflow Artifacts map in `skills/context-engineering/SKILL.md` for how it feeds the downstream idea, spec, and plan.
+If the user wants the intent to persist (a multi-session project, a handoff to another collaborator), offer to save it to `docs/intent/<topic>.md`. Only save if they confirm — it's the earliest global Define-phase artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
 
 ## Example
 
