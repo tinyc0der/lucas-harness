@@ -13,3 +13,5 @@ Begin by understanding what the user wants to build. Ask clarifying questions ab
 Then generate a structured spec covering all six core areas: objective, commands, project structure, code style, testing strategy, and boundaries.
 
 Save the spec to `docs/specs/<slug>/spec.md`, where `<slug>` is the current git branch name (see the Workflow Artifacts map in the `context-engineering` skill for the slug-resolution rule). If you're on the default branch (`main`/`master`), create a feature branch first — don't write feature artifacts onto the trunk. Create the `docs/specs/<slug>/` directory if it doesn't exist, then confirm with the user before proceeding.
+
+If this spec grew out of a refined idea (`docs/ideas/<idea-name>.md`) or an intent statement (`docs/intent/<topic>.md`), add a `> Source: <path>` line under the spec title to preserve the provenance trail. Those Define-phase artifacts stay global — don't move them into the feature directory.

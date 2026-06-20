@@ -122,6 +122,13 @@ feature that prompted them (an architectural decision or an on-call runbook is c
 the branch merges), so they're global too. Only the spec→ship lifecycle is per-feature, because
 that's the work that's genuinely concurrent across branches.
 
+**Provenance, not relocation.** The Define-phase artifacts are deliberately *not* copied into the
+feature directory, because one intent/idea can fan out into several specs and some are rejected
+before any branch exists — a 1:1 move would break both cases. Instead the trail is preserved by a
+link: each artifact carries a `> Source: <upstream path>` line pointing one hop back
+(`idea → intent`, `spec → idea`). The "why" stays reachable from any feature without duplicating the
+artifact.
+
 ### Level 3: Relevant Source Files
 
 Before editing a file, read it. Before implementing a pattern, find an existing example in the codebase.

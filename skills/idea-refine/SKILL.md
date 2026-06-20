@@ -36,6 +36,8 @@ The final output is a markdown one-pager saved to `docs/ideas/<idea-name>.md` (a
 - MVP Scope
 - Not Doing list
 
+If this idea came out of an `interview-me` session, add a `> Source: docs/intent/<topic>.md` line at the top so the intent → idea → spec trail stays linkable. Downstream, `spec-driven-development` adds the same kind of line pointing back here.
+
 ## Detailed Instructions
 
 You are an ideation partner. Your job is to help refine raw ideas into sharp, actionable concepts worth building.
