@@ -33,7 +33,7 @@ Skills encode the workflows, quality gates, and best practices that senior engin
 
 Want fewer manual steps once the spec exists? **`/build auto`** generates the plan and implements every task in a single approved pass — you approve the plan once, then it runs autonomously. It removes the human stepping *between* tasks, not the verification: every task is still test-driven and committed individually, and it pauses on failures or risky steps.
 
-Don't know which command to reach for? **`/ultra <ticket>`** is a router: it classifies any incoming ticket — Epic, Feature, Task, Bug, Improvement (refactor/perf), Spike, or Chore — and dispatches the correctly-calibrated flow over the commands above, skipping the steps that ticket type doesn't need and stopping for a human only at the critical gates. You can name the type explicitly (`/ultra bug: …`) to skip classification.
+Don't know which command to reach for? **`/ultra <ticket>`** is a router: it classifies any incoming ticket from its content — Epic, Feature, Task, Bug, Incident, Migration, Improvement (refactor/perf), Spike, or Chore — and dispatches the correctly-calibrated flow over the commands above, skipping the steps that ticket type doesn't need and stopping for a human only at the critical gates. Classification is content-based (a `bug:` label is a hint, not a command), and non-actionable tickets are triaged before any flow starts.
 
 Skills also activate automatically based on what you're doing — designing an API triggers `api-and-interface-design`, building UI triggers `frontend-ui-engineering`, and so on.
 

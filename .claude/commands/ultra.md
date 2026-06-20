@@ -1,8 +1,12 @@
 ---
-description: Route any incoming ticket to its correctly-calibrated flow — classify Epic/Feature/Task/Bug/Improvement/Spike/Chore, then dispatch existing commands, stopping for a human only at critical gates.
+description: Route any incoming ticket to its correctly-calibrated flow — classify the ticket type (Feature, Bug, Migration, Incident, Spike, Chore, …), then dispatch existing commands, stopping for a human only at critical gates.
 ---
 
 `/ultra` is a **router**, not a new workflow. It reads the ticket in `$ARGUMENTS`, classifies it, sets up the branch, then dispatches the existing commands and skills in the calibration that fits that ticket type. It adds no new mechanics — every step below is an existing `/command` or `lucas-harness:<skill>`. The win is *picking the right flow* and *skipping the steps that type doesn't need*, while still stopping for a human at the genuinely critical gates.
+
+## Step 0 — Triage (is this actionable work?)
+
+Before classifying, confirm the ticket is buildable engineering work. If it's a **question**, a **duplicate**, **missing detail** needed to act, or a **won't-fix / out-of-scope** item, don't force it into a flow — answer it, ask for the missing detail, or recommend closing it, then stop. Only proceed to Step 1 once there's actionable work.
 
 ## Step 1 — Classify (explicit and overridable)
 
@@ -13,18 +17,21 @@ Classify from the **content** of the ticket — judge what the work actually ent
 | **Epic** | Spans multiple shippable features/surfaces; "build an X system"; too big for one spec. |
 | **Feature** | One net-new user-facing capability worth a spec; a single shippable unit. |
 | **Task** | A small, well-defined slice of an already-specced feature; no spec of its own. |
-| **Bug** | Something is broken, incorrect, or regressed; a reproducible defect. |
+| **Bug** | Something is broken, incorrect, or regressed; a reproducible defect (not currently a live outage). |
+| **Incident · hotfix** | Production is broken or degraded **right now**; urgency dominates ("outage", "down", "P0/P1", "prod regression"). |
+| **Migration · deprecation** | Removing, replacing, or sunsetting existing behavior/API/data — not adding or fixing ("deprecate", "migrate", "sunset", "remove X", "drop support for"). |
 | **Improvement · refactor** | Change internal structure *without* changing behavior ("clean up", "simplify", "refactor"). |
 | **Improvement · perf** | Make existing behavior faster/lighter ("slow", "optimize", "latency", "memory"). |
 | **Spike** | Open question or research ("investigate", "explore", "prototype to learn"); throwaway. |
-| **Chore** | Maintenance with no user-facing runtime change (deps bump, config, CI, tooling, version, formatting). |
+| **Chore** | Maintenance with no user-facing runtime change (deps bump, config, CI, tooling, version, formatting; docs-only counts here). |
 
 ## Step 2 — Set up the branch (preserve the slug contract)
 
 All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the current git branch name (see the Workflow Artifacts map in the `context-engineering` skill). **Never write feature artifacts onto `main`/`master`.** Create the branch *before* any artifact-producing step:
 
-- Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Refactor → `improve/<x>` · Perf → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
+- Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Refactor → `improve/<x>` · Perf → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
 - Epic → no single branch; each child feature gets its own `feature/<x>` (see below).
+- Migration guides live at `docs/migrations/<name>.md` and incident runbooks at `docs/runbooks/<alert>.md` — both **global** tiers in the artifact map, not under `docs/specs/<slug>/`.
 
 ## Step 3 — Dispatch the calibrated flow
 
@@ -33,11 +40,13 @@ Throughout, **"verify"** means: run the app and observe the changed runtime beha
 - **Epic** — `lucas-harness:interview-me` → write intent to `docs/intent/<topic>.md` → 🔴 **approve the split** into features → run the **Feature** flow below for each child feature on its own branch → finish with an integration **verify** across the assembled features. *Skips:* one mega spec/plan/ship.
 - **Feature** — `/spec` (🔴 confirm spec) → `/build auto` (🔴 approve plan — the gate lives inside `build auto`) → **verify** if the ticket has runtime surface → `/ship` (🔴 GO/NO-GO). *Skips:* `/plan` and `/test` — both run inside `/build auto`.
 - **Task** — `/build` (single task) → **verify** if it has runtime surface. The child rides the parent feature's `/ship`. *Skips:* spec, plan, `/test`, full ship. No human gate unless an escalation trigger fires.
-- **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → ship (🔴 if it's a hotfix). *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop.
+- **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → ship. *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop. (If it's live in production, route to **Incident** instead.)
+- **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: write or update a runbook at `docs/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
+- **Migration · deprecation** — write the migration/deprecation guide to `docs/migrations/<name>.md` via `lucas-harness:deprecation-and-migration` (the guide *is* the spec) → roll out in phases (deprecate → warn → remove) → 🔴 **destructive/irreversible-step gate** before any data migration, public-API removal, or dropped column (anything not `git revert`-able) → **verify** each phase → `/review` → `/ship` with the guide + a `CHANGELOG.md` entry and the deprecation timeline communicated. *Skips:* `/spec`, `/plan` for the mechanics.
 - **Improvement · refactor** — ensure tests guard the current behavior first (add via `/test` if missing) → `/code-simplify` (it runs the test loop internally) → `/review` → ship-lite. *Skips:* spec, plan, a separate `/test` pass, and **verify** — unless the change turns out to alter behavior, in which case verify.
 - **Improvement · perf** — capture a baseline measurement → `lucas-harness:performance-optimization` (or `/webperf` for web surfaces) → **verify the measured improvement** (re-measure, don't assume) → `/review` → `/ship`. 🔴 if it touches a hot or risky path. *Skips:* spec, plan.
 - **Spike** — 🔴 **frame the scope/question** → explore (throwaway code, don't merge) → write findings to `docs/ideas/<x>.md` via `lucas-harness:idea-refine` → 🔴 **promote** (re-enter as a Feature) **or drop**. *Skips:* tests, verify, review, ship.
-- **Chore** — make the change → `/test` + build (hand-written change bypasses `/build`'s loop, so `/test` is the explicit gate) → smoke-**verify** only if it touches a runtime dependency or config → ship-lite. 🔴 if it touches secrets, CI, deploy, or config. *Skips:* spec, plan, review.
+- **Chore** — make the change → `/test` + build (hand-written change bypasses `/build`'s loop, so `/test` is the explicit gate) → smoke-**verify** only if it touches a runtime dependency or config → ship-lite. 🔴 if it touches secrets, CI, deploy, or config. *Skips:* spec, plan, review. (Docs-only chores: invoke `lucas-harness:documentation-and-adrs` and skip the test step.)
 
 ## Two calibration rules (why steps get skipped)
 
@@ -46,7 +55,7 @@ Throughout, **"verify"** means: run the app and observe the changed runtime beha
 
 ## Human-in-the-middle (critical gates only)
 
-Run autonomously between steps. Stop for a human **only** at: the 🔴 gates above (spec confirm, plan approval inside `/build auto`, ship GO/NO-GO, Epic split, Spike frame/promote-drop), and the standard escalation triggers — auth/permissions, payments, destructive migrations, deletions, deploys, secrets, anything not undoable with `git revert`, unfixable test/build failures, ambiguous specs, or Critical security/review findings (NO-GO by default). These are enforced by `lucas-harness:doubt-driven-development` and the escalation list in `/build`; don't re-derive them.
+Run autonomously between steps. Stop for a human **only** at: the 🔴 gates above (spec confirm, plan approval inside `/build auto`, ship GO/NO-GO, Epic split, Spike frame/promote-drop, Incident mitigate-first, Migration destructive-step), and the standard escalation triggers — auth/permissions, payments, destructive migrations, deletions, deploys, secrets, anything not undoable with `git revert`, unfixable test/build failures, ambiguous specs, or Critical security/review findings (NO-GO by default). These are enforced by `lucas-harness:doubt-driven-development` and the escalation list in `/build`; don't re-derive them.
 
 ## Rules
 
