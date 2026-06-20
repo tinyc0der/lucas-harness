@@ -115,6 +115,7 @@ The `.claude/commands/` directory contains slash commands for Claude Code:
 | `/code-simplify` | code-simplification |
 | `/ship` | shipping-and-launch |
 | `/webperf` | web-performance-auditor (specialist agent, web apps only) |
+| `/ultra` | router — classifies a ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above |
 
 ## Using References
 

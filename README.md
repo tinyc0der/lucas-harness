@@ -33,6 +33,8 @@ Skills encode the workflows, quality gates, and best practices that senior engin
 
 Want fewer manual steps once the spec exists? **`/build auto`** generates the plan and implements every task in a single approved pass — you approve the plan once, then it runs autonomously. It removes the human stepping *between* tasks, not the verification: every task is still test-driven and committed individually, and it pauses on failures or risky steps.
 
+Don't know which command to reach for? **`/ultra <ticket>`** is a router: it classifies any incoming ticket from its content — Epic, Feature, Task, Bug, Incident, Migration, Improvement (refactor/perf), Spike, or Chore — and dispatches the correctly-calibrated flow over the commands above, skipping the steps that ticket type doesn't need and stopping for a human only at the critical gates. Classification is content-based (a `bug:` label is a hint, not a command). It also accepts a raw goal rather than a scoped ticket — broad or fuzzy intent ("support SSO", "make onboarding smoother") is refined through the Define phase (`interview-me` / `idea-refine`) before classification, and non-actionable input is triaged out before any flow starts.
+
 Skills also activate automatically based on what you're doing — designing an API triggers `api-and-interface-design`, building UI triggers `frontend-ui-engineering`, and so on.
 
 ---
@@ -307,9 +309,9 @@ lucas-harness/
 ├── agents/                            # 4 specialist personas
 ├── references/                        # 5 supplementary checklists
 ├── hooks/                             # Session lifecycle hooks
-├── .claude/commands/                  # 7 slash commands (Claude Code)
-├── .gemini/commands/                  # 7 slash commands (Gemini CLI)
-├── commands/                          # 8 slash commands (Antigravity CLI)
+├── .claude/commands/                  # 9 slash commands (Claude Code)
+├── .gemini/commands/                  # 9 slash commands (Gemini CLI)
+├── commands/                          # 9 slash commands (Antigravity CLI)
 ├── plugin.json                        # Antigravity plugin manifest
 └── docs/                              # Setup guides per tool
 ```
