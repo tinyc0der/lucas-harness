@@ -8,7 +8,7 @@ This is the lucas-harness project — a collection of production-grade engineeri
 skills/       → Core skills (SKILL.md per directory)
 agents/       → Reusable agent personas (code-reviewer, test-engineer, security-auditor, web-performance-auditor)
 hooks/        → Session lifecycle hooks
-.claude/commands/ → Slash commands (/spec, /plan, /build, /test, /review, /code-simplify, /ship; plus /webperf specialist audit)
+.claude/commands/ → Slash commands (/spec, /plan, /build, /test, /review, /code-simplify, /ship; plus /webperf specialist audit and /ultra ticket router)
 references/   → Supplementary checklists (testing, performance, security, accessibility, observability)
 docs/         → Setup guides for different tools
 ```
