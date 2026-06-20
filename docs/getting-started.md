@@ -115,7 +115,8 @@ The `.claude/commands/` directory contains slash commands for Claude Code:
 | `/code-simplify` | code-simplification |
 | `/ship` | shipping-and-launch |
 | `/webperf` | web-performance-auditor (specialist agent, web apps only) |
-| `/ultra` | router — classifies a ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above |
+
+> Not sure which command fits? The `ticket-routing` skill is a router — it classifies an incoming ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above. It activates by description rather than a slash command, so just describe the ticket and let it route.
 
 ## Using References
 
