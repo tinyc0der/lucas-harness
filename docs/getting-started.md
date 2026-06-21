@@ -116,7 +116,7 @@ The `.claude/commands/` directory contains slash commands for Claude Code:
 | `/ship` | shipping-and-launch |
 | `/webperf` | web-performance-auditor (specialist agent, web apps only) |
 
-> Not sure which command fits? The `ticket-routing` skill is a router — it classifies an incoming ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above. It activates by description rather than a slash command, so just describe the ticket and let it route.
+> Not sure which command fits? The `using-lucas-harness` meta-skill also routes a whole ticket: it classifies an incoming ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above (see its "Routing an Incoming Ticket" section). It activates by description rather than a slash command, so just describe the ticket and let it route.
 
 ## Using References
 
