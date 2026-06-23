@@ -19,7 +19,7 @@ Ship with confidence. The goal is not just to deploy — it's to deploy safely, 
 
 ## The Pre-Launch Checklist
 
-When shipping is part of the workflow, persist the go/no-go decision and its rollback plan to `docs/specs/<slug>/ship.md` (one directory per feature, `<slug>` = current git branch — see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`) so the launch call stays auditable after the session. If a prior `/review` left `docs/specs/<slug>/review.md`, fold its findings into the decision rather than re-deriving them. For an ad-hoc ship check outside the workflow, report inline instead.
+When shipping is part of the workflow, persist the go/no-go decision and its rollback plan to `docs/specs/<slug>/ship.md` (one directory per feature, `<slug>` = filesystem-safe feature slug derived from the current git branch — see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`) so the launch call stays auditable after the session. If a prior `/review` left `docs/specs/<slug>/review.md`, fold its findings into the decision rather than re-deriving them. When linking sibling artifacts from `ship.md`, use same-directory relative links such as `[review.md](review.md)` and `[plan.md](plan.md)`, never local absolute paths or `file://` links. For an ad-hoc ship check outside the workflow, report inline instead.
 
 ### Code Quality
 
