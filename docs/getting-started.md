@@ -133,7 +133,7 @@ Load a reference when you need detailed patterns beyond what the skill covers.
 
 ## Spec and task artifacts
 
-Skills and commands write durable markdown artifacts in three tiers by lifespan. The core of the lifecycle is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the current git branch name — this lets multiple features have specs in flight at once instead of contending for a single root file. The bookends are **global**:
+Skills and commands write durable markdown artifacts in three tiers by lifespan. The core of the lifecycle is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the filesystem-safe feature slug derived from the current git branch name — this lets multiple features have specs in flight at once instead of contending for a single root file. The bookends are **global**:
 
 | Tier | Source | Artifact |
 |------|--------|----------|

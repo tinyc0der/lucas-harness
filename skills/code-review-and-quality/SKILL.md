@@ -267,7 +267,7 @@ Part of code review is dependency review:
 
 ## The Review Checklist
 
-When the review is part of the workflow, persist the completed report to `docs/specs/<slug>/review.md` (one directory per feature, `<slug>` = current git branch — see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). A persisted review survives the session, gives the feature an audit trail, and lets `/ship` fold in the findings instead of re-deriving them. For an ad-hoc review outside the workflow, report inline instead.
+When the review is part of the workflow, persist the completed report to `docs/specs/<slug>/review.md` (one directory per feature, `<slug>` = filesystem-safe feature slug derived from the current git branch — see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). A persisted review survives the session, gives the feature an audit trail, and lets `/ship` fold in the findings instead of re-deriving them. When linking sibling artifacts from `review.md`, use same-directory relative links such as `[plan.md](plan.md)`, never local absolute paths or `file://` links. For an ad-hoc review outside the workflow, report inline instead.
 
 ```markdown
 ## Review: [PR/Change title]

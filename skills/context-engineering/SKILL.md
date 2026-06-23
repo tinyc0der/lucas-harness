@@ -96,7 +96,7 @@ docs/
   intent/<topic>.md      ← interview-me            ┐ Define phase — GLOBAL, pre-feature
   ideas/<idea>.md        ← idea-refine             ┘ (no branch exists yet)
 
-  specs/<slug>/          ← one directory per feature; slug = the current git branch name
+  specs/<slug>/          ← one directory per feature; slug = filesystem-safe branch slug
     spec.md              ← /spec   (spec-driven-development)   ┐ PER-FEATURE — scoped so
     plan.md              ← /plan   (planning-and-task-breakdown)│ multiple features can be
     review.md            ← /review (code-review-and-quality)   │ in flight at once
@@ -109,8 +109,16 @@ CHANGELOG.md             ← documentation-and-adrs  ┘ (repo root, conventiona
 ```
 
 **Feature-slug resolution (branch-name mapping)** — for the per-feature tier only:
-- The slug is the **current git branch name**, sanitized to kebab-case (strip a leading
-  `feature/`, `claude/`, or similar prefix). Branch `feature/user-auth` → `docs/specs/user-auth/`.
+- The slug is a **filesystem-safe single path segment** derived from the current git branch name.
+  Never interpolate the raw branch name directly into `docs/specs/<slug>/`.
+- To derive it: drop leading workflow, agent, remote, or owner namespace prefixes such as
+  `feature/`, `fix/`, `hotfix/`, `chore/`, `task/`, `migrate/`, `perf/`, `improve/`,
+  `spike/`, `claude/`, `codex/`, `origin/`, or another owner/remote prefix; then sanitize
+  the remainder to kebab-case by lowercasing, replacing every run of non-alphanumeric characters
+  (including `/`) with `-`, and trimming leading/trailing `-`.
+- Examples: branch `feature/user-auth` → `docs/specs/user-auth/`; branch
+  `origin/prioritize-self-improvement` → `docs/specs/prioritize-self-improvement/`;
+  branch `fix/audio/import-crash` → `docs/specs/audio-import-crash/`.
 - One feature per branch. If you're on the default branch (`main`/`master`), create a feature
   branch *before* `/spec` — don't write feature artifacts onto the trunk.
 - **To resolve the active feature when reading:** use the directory matching the current branch;
@@ -128,6 +136,13 @@ before any branch exists — a 1:1 move would break both cases. Instead the trai
 link: each artifact carries a `> Source: <upstream path>` line pointing one hop back
 (`idea → intent`, `spec → idea`). The "why" stays reachable from any feature without duplicating the
 artifact.
+
+**Artifact links are portable.** Persisted workflow artifacts must use repo-relative paths or
+same-directory relative Markdown links. Never write local absolute paths or `file://` links into
+`spec.md`, `plan.md`, `review.md`, `ship.md`, or Define-phase artifacts. Examples: from
+`docs/specs/<slug>/ship.md`, link to `[review.md](review.md)` and `[plan.md](plan.md)`; from
+`docs/specs/<slug>/spec.md`, link back to a Define artifact as
+`[idea-name.md](../../ideas/idea-name.md)`.
 
 ### Level 3: Relevant Source Files
 

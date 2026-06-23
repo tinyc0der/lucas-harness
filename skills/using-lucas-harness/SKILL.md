@@ -80,7 +80,7 @@ Classify from the **content** of the ticket — judge what the work actually ent
 
 ### Step 2 — Set up the branch & artifacts
 
-All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the current git branch name (see the Workflow Artifacts map in the `context-engineering` skill). **Never write feature artifacts onto `main`/`master`.** Create the branch *before* any artifact-producing step:
+All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the filesystem-safe feature slug derived from the current git branch name (see the Workflow Artifacts map in the `context-engineering` skill). **Never write feature artifacts onto `main`/`master`, and never use the raw branch name as a path.** Create the branch *before* any artifact-producing step:
 
 - Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Improvement (refactor) → `improve/<x>` · Improvement (perf) → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
 - Epic → no single branch; each child feature gets its own `feature/<x>` (see below).

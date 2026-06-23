@@ -116,9 +116,9 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 [Anything unresolved that needs human input]
 ```
 
-**Where the spec lives.** Save it to `docs/specs/<slug>/spec.md`, one directory per feature, where `<slug>` is the current git branch name. This is what lets multiple features have specs in flight at once instead of contending for a single root file. See the Workflow Artifacts map in `skills/context-engineering/SKILL.md` (`context-engineering`) for the full layout and slug-resolution rule; the plan (Phase 2) and task ledger (Phase 3) land alongside it as `docs/specs/<slug>/plan.md`.
+**Where the spec lives.** Save it to `docs/specs/<slug>/spec.md`, one directory per feature, where `<slug>` is the filesystem-safe feature slug derived from the current git branch name. Do not use the raw branch name as a path: branch `origin/prioritize-self-improvement` resolves to `docs/specs/prioritize-self-improvement/spec.md`, not `docs/specs/origin/prioritize-self-improvement/spec.md`. This is what lets multiple features have specs in flight at once instead of contending for a single root file. See the Workflow Artifacts map in `skills/context-engineering/SKILL.md` (`context-engineering`) for the full layout and slug-resolution rule; the plan (Phase 2) and task ledger (Phase 3) land alongside it as `docs/specs/<slug>/plan.md`.
 
-If this spec grew out of a refined idea or intent statement, add the `> Source:` line shown in the template above (omit it for a spec written cold). Those Define-phase artifacts stay global rather than moving into the feature directory — see "Provenance, not relocation" in the Workflow Artifacts map for why.
+If this spec grew out of a refined idea or intent statement, add the `> Source:` line shown in the template above (omit it for a spec written cold). Use a repo-relative path or a relative Markdown link from the spec file, never a local absolute path or `file://` link. Those Define-phase artifacts stay global rather than moving into the feature directory — see "Provenance, not relocation" in the Workflow Artifacts map for why.
 
 **Reframe instructions as success criteria.** When receiving vague requirements, translate them into concrete conditions:
 

@@ -64,6 +64,11 @@ const SKILL_REF_PATTERNS = [
   /→ `([a-z][a-z0-9-]+[a-z0-9])`/g,
 ];
 
+const PER_FEATURE_ARTIFACT_PATTERN = /docs\/specs\/<slug>/;
+const RAW_BRANCH_SLUG_PATTERN = /<slug>[^.\n]*(?:current git branch|git branch name)/i;
+const SAFE_SLUG_PATTERN = /(?:saniti[sz]ed|filesystem-safe|single path segment|no `\/`|without slashes)/i;
+const LOCAL_FILE_URI_LINK_PATTERN = /\[[^\]]+\]\(file:\/\/|<file:\/\//;
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -178,6 +183,33 @@ function validateSkill(dirName, knownSkills) {
   for (const ref of refs) {
     if (!knownSkills.has(ref)) {
       warnings.push(`Dead cross-reference: \`${ref}\` is not a known skill`);
+    }
+  }
+
+  // ── Per-feature artifact slug safety ─────────────────────────────────────
+  // Branch names commonly contain slashes (feature/foo, remote/foo). Skills
+  // must not imply that raw branch names can be interpolated directly into
+  // docs/specs/<slug>/ paths, or agents will create nested directories.
+  for (const line of content.split(/\r?\n/)) {
+    if (LOCAL_FILE_URI_LINK_PATTERN.test(line)) {
+      errors.push(
+        'Skill examples must not use local file URI markdown links; use repo-relative or same-directory relative links.'
+      );
+      break;
+    }
+  }
+
+  for (const line of content.split(/\r?\n/)) {
+    if (
+      PER_FEATURE_ARTIFACT_PATTERN.test(line) &&
+      RAW_BRANCH_SLUG_PATTERN.test(line) &&
+      !SAFE_SLUG_PATTERN.test(line)
+    ) {
+      errors.push(
+        'Per-feature artifact path mentions `<slug>` as the current git branch without also requiring ' +
+        'a sanitized/filesystem-safe single path segment.'
+      );
+      break;
     }
   }
 
