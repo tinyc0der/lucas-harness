@@ -34,7 +34,8 @@ The project separates durable knowledge into clear homes:
 project.md         → stable (but evolving) project contract, direction, constraints
 adrs/              → architecture decision records
 specs/<feature>/   → per-feature workflow lifecycle: intent → spec → plan → review → ship
-steering/          → durable cross-workflow knowledge that fits nowhere above
+steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
+runbooks/          → repeatable operational procedures (imperative)
 ```
 
 `specs/<feature>/` IS the workflow folder — organized by feature rather than an
@@ -123,7 +124,7 @@ always load, and it carries enough signal to decide what *not* to load.
 ## Suggested steering/ Layout
 
 ```
-steering/
+steering/             → declarative durable knowledge
   index.md          → compact summaries + discovery paths, not just a file list
   overview.md       → durable project summary
   conventions.md    → naming, file org, import patterns, anti-patterns
@@ -131,16 +132,19 @@ steering/
   risks.md          → known fragile areas, failure modes
   lessons.md        → evidence-backed lessons from completed features
   preferences.md    → user/team working preferences
-  runbooks/         → imperative, step-by-step operational procedures
-    deploy.md
-    rollback.md
-    incident-db-failover.md
+
+runbooks/             → sibling top-level home for imperative procedures
+  deploy.md
+  rollback.md
+  incident-db-failover.md
 ```
 
-**Runbooks are memory's *imperative* half.** Most of memory is declarative (facts,
-conventions, lessons); a runbook is an ordered, executable procedure for a
-recurring operation. It's durable and cross-workflow, owned by no spec or ADR — so
-it belongs in `steering/`, nested under `runbooks/`. Two rules keep them honest:
+**Runbooks are memory's *imperative* half — a top-level home, not a `steering/`
+subfolder.** Most of memory is declarative (facts, conventions, lessons) and lives
+in `steering/`; a runbook is an ordered, executable procedure for a recurring
+operation. It's durable and cross-workflow, owned by no spec or ADR, but distinct
+in *shape* from declarative knowledge — so it sits in a sibling `runbooks/`
+directory alongside `steering/` and `adrs/`. Two rules keep them honest:
 
 - **Link, don't restate** — a runbook references the actual scripts, CI config,
   and `commands.md` rather than copying command text that will drift. One

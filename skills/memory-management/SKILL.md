@@ -54,8 +54,11 @@ Durable memory is separated into homes. The skill's first move is always to ask 
 project.md         → stable (but evolving) project contract, direction, constraints
 adrs/              → architecture decision records (deliberate, dated decisions)
 specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
-steering/          → durable cross-workflow knowledge that fits nowhere above
+steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
+runbooks/          → repeatable operational procedures (imperative)
 ```
+
+`steering/` and `runbooks/` are siblings that split durable knowledge by *shape*: `steering/` holds **declarative** facts (what's true — conventions, risks, lessons), and `runbooks/` holds **imperative** procedures (what to do — deploy, rollback, incident response). They share the same lifecycle (durable, synced, promoted, reviewed); the split is just declarative-vs-imperative.
 
 `steering/` is the **residue** — the institutional knowledge that lives *between* the other documents:
 
@@ -64,10 +67,9 @@ steering/          → durable cross-workflow knowledge that fits nowhere above
 | Product direction → `project.md` | Conventions the code follows but no doc states |
 | A deliberate architecture decision → `adrs/` | Build / test / verify / deploy commands and env quirks |
 | One feature's requirements → `specs/<feature>/` | Known risks and fragile areas found while working |
-| One feature's lifecycle → `specs/<feature>/` | Recurring failure modes |
+| A step-by-step operational procedure → `runbooks/` | Recurring failure modes |
 | | Lessons from completed features ("tried X, failed because Y") |
 | | User/team working preferences too informal for a spec |
-| | Runbooks — repeatable operational procedures |
 
 **ADR vs. memory lesson:** a *deliberate* architecture choice gets an ADR; an *observed* gotcha or failure with no formal decision attached is a memory lesson. Memory links to the ADR rather than restating it.
 
@@ -144,10 +146,11 @@ steering/
   risks.md          → known fragile areas, failure modes
   lessons.md        → evidence-backed lessons from completed features
   preferences.md    → user/team working preferences
-  runbooks/         → imperative, step-by-step operational procedures
-    deploy.md
-    rollback.md
-    incident-db-failover.md
+
+runbooks/           → sibling top-level home for imperative procedures
+  deploy.md
+  rollback.md
+  incident-db-failover.md
 ```
 
 **One domain per file.** A file covers exactly one concern. Don't merge unrelated topics to cut file count, and don't let one file accumulate several — that's what keeps the index and pruning clean. As a project grows, give recurring domains their own files: `api-standards.md`, `testing-standards.md`, `security-policies.md`, `deployment-workflow.md`.
@@ -167,7 +170,7 @@ steering/
 
 Good: `risks/auth/session-fixation.md`. Bad: `auth_session_risk.md` (flat, underscored). Each parent file lists its children in a **"Related files"** section — the per-level equivalent of the top-level index.
 
-**Runbooks are memory's imperative half.** Most of memory is declarative (facts, conventions, lessons); a runbook is an ordered, executable procedure for a recurring operation. Keep them honest with one rule: **link, don't restate** — a runbook references the actual scripts, CI config, and `commands.md` rather than copying command text that will drift.
+**Runbooks are memory's imperative half — their own top-level home.** Most of memory is declarative (facts, conventions, lessons) and lives in `steering/`; a runbook is an ordered, executable procedure for a recurring operation, so it sits in a sibling `runbooks/` directory rather than inside `steering/`. Keep them honest with one rule: **link, don't restate** — a runbook references the actual scripts, CI config, and `steering/commands.md` rather than copying command text that will drift.
 
 ## Pruning: Cut for Wrongness, Not Size
 
