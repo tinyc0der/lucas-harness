@@ -135,40 +135,45 @@ Never load all of memory at once. Split it into two tiers:
 
 `index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per topic plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
 
-## How Memory Is Organized: File Granularity
+## How Memory Is Organized: Organize by Domain, Not by Knowledge-Type
+
+The single most important structural rule: **a file is a domain, not a category of fact.** When you work on auth, you want auth's conventions, its risks, and its past lessons *together* — so they belong in `auth.md`, not scattered across a `conventions.md`, a `risks.md`, and a `lessons.md`. Both Kiro and Letta organize this way, and the reason is retrieval: you look things up by *what you're working on*, not by what type of knowledge it is. A `risks.md` that collects risks from every domain is a dumping ground that violates one-domain-per-file and makes conditional loading impossible.
 
 ```
 steering/
   index.md          → compact summaries + discovery paths (always loaded)
   overview.md       → durable project summary (always loaded)
-  conventions.md    → naming, file org, import patterns, anti-patterns
+
+  # cross-cutting type files — only for genuinely project-wide knowledge
+  # that has no single domain to live in:
+  conventions.md    → global rules (naming, no default exports, import patterns)
   commands.md       → build / test / verify / deploy commands + env quirks
-  risks.md          → known fragile areas, failure modes
-  lessons.md        → evidence-backed lessons from completed features
-  preferences.md    → user/team working preferences
+  preferences.md    → team working preferences
+
+  # domain files — the default home; each holds ITS OWN conventions,
+  # risks, and lessons, and nests as it grows:
+  auth.md           → auth/session.md → auth/session/fixation.md
+  billing.md
+  api.md
+  testing.md
 
 runbooks/           → sibling top-level home for imperative procedures
   deploy.md
   rollback.md
-  incident-db-failover.md
 ```
 
-**One domain per file.** A file covers exactly one concern. Don't merge unrelated topics to cut file count, and don't let one file accumulate several — that's what keeps the index and pruning clean. As a project grows, give recurring domains their own files: `api-standards.md`, `testing-standards.md`, `security-policies.md`, `deployment-workflow.md`.
+**The routing rule that kills the ambiguity:** domain-specific knowledge goes in its domain file; only knowledge with *no single domain* goes in a cross-cutting type file. An auth token-lifetime rule → `auth.md`. A risk found in billing → `billing.md`. A truly project-wide rule like "no default exports" → `conventions.md`. There is no catch-all `risks.md` or `lessons.md`.
+
+**Lead every file with its *why*.** Open a domain file with a one- or two-line philosophy/rationale before the specifics (Kiro structures every steering file this way). The why is what lets a future session apply the rules with judgment and know when they've stopped applying.
+
+**One domain per file.** A file covers exactly one concern. Don't merge unrelated topics to cut file count, and don't let one file accumulate several — that's what keeps the index and pruning clean.
 
 **Size by signal, not by a line cap.** There is no fixed ceiling — prioritize clarity and easy retrieval over arbitrary limits.
 - **Split** a file when it holds 2+ distinct concepts, or has grown hard to scan.
 - **Merge** files when they overlap, or when one is too small to stand alone (rule of thumb: under ~20 lines). This is the only hard threshold, and it's a *floor* — resist splitting a cohesive single-topic file just because it got long.
 - As a *soft* calibration, ~100–200 lines (a 2–3 minute read) is a healthy size. Treat drift well past it as a smell worth checking for a second concept, not a rule that forces a split. Split by concept, never because a line count tripped.
 
-**Nest with `/` naming; prefer depth over breadth.** Nest related topics rather than spreading flat top-level files:
-
-| Depth | Example | Use for |
-|---|---|---|
-| 1 | `risks.md` | index / top-level topic |
-| 2 | `risks/auth.md` | a topic area |
-| 3 | `risks/auth/session-fixation.md` | a specific detail |
-
-Good: `risks/auth/session-fixation.md`. Bad: `auth_session_risk.md` (flat, underscored). Each parent file lists its children in a **"Related files"** section — the per-level equivalent of the top-level index.
+**Start flat, nest as a domain grows.** A small project's `auth.md` is one file. When it gets big, decompose by topic — `auth.md → auth/session.md → auth/session/fixation.md` — and have the parent list its children in a **"Related files"** section (the per-level equivalent of the top-level index). Prefer depth over a sprawl of flat top-level files, but don't pre-build a deep hierarchy before the content justifies it. Good: `auth/session-fixation.md`. Bad: `auth_session_risk.md` (flat, underscored).
 
 **Runbooks are memory's imperative half — their own top-level home.** Most of memory is declarative (facts, conventions, lessons) and lives in `steering/`; a runbook is an ordered, executable procedure for a recurring operation, so it sits in a sibling `runbooks/` directory rather than inside `steering/`. Keep them honest with one rule: **link, don't restate** — a runbook references the actual scripts, CI config, and `steering/commands.md` rather than copying command text that will drift.
 

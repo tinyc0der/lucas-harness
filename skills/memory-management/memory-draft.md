@@ -123,21 +123,40 @@ always load, and it carries enough signal to decide what *not* to load.
 
 ## Suggested steering/ Layout
 
+**Organize by domain, not by knowledge-type.** A file is a *domain*, not a
+category of fact. Auth's conventions, risks, and lessons live together in
+`auth.md` — not scattered across a `conventions.md` + `risks.md` + `lessons.md`.
+Both Kiro and Letta organize this way; retrieval is by *what you're working on*.
+A `risks.md` collecting risks from every domain is a dumping ground that breaks
+one-domain-per-file and conditional loading. There is **no** catch-all `risks.md`
+or `lessons.md`.
+
 ```
 steering/             → declarative durable knowledge
-  index.md          → compact summaries + discovery paths, not just a file list
-  overview.md       → durable project summary
-  conventions.md    → naming, file org, import patterns, anti-patterns
+  index.md          → compact summaries + discovery paths (always loaded)
+  overview.md       → durable project summary (always loaded)
+
+  # cross-cutting type files — only for genuinely project-wide knowledge:
+  conventions.md    → global rules (naming, no default exports, imports)
   commands.md       → build / test / verify / deploy commands + env quirks
-  risks.md          → known fragile areas, failure modes
-  lessons.md        → evidence-backed lessons from completed features
-  preferences.md    → user/team working preferences
+  preferences.md    → team working preferences
+
+  # domain files — the default home; each holds its own conventions,
+  # risks, lessons; nests as it grows:
+  auth.md           → auth/session.md → auth/session/fixation.md
+  billing.md
+  api.md
+  testing.md
 
 runbooks/             → sibling top-level home for imperative procedures
   deploy.md
   rollback.md
   incident-db-failover.md
 ```
+
+**Routing rule:** domain-specific knowledge → its domain file; only knowledge with
+no single domain → a cross-cutting type file. **Lead each file with its *why*** (a
+philosophy/rationale line, per Kiro) before specifics.
 
 **Runbooks are memory's *imperative* half — a top-level home, not a `steering/`
 subfolder.** Most of memory is declarative (facts, conventions, lessons) and lives
@@ -153,17 +172,14 @@ directory alongside `steering/` and `adrs/`. Two rules keep them honest:
   ("DB failover needs X") graduates into a runbook *step*. This extends the
   promotion chain: delta → lesson → (when procedural and recurring) runbook.
 
-As the project grows, split by domain rather than letting files sprawl — Kiro's
-steering catalog is a good guide for what tends to deserve its own file:
+Kiro's domain templates are a good guide for which domains commonly earn a file —
+each is a *domain*, not a knowledge-type: `api-standards.md`, `testing.md`,
+`security.md`, `database.md`, `authentication.md`, `error-handling.md`,
+`deployment.md`. Each opens with a `## Philosophy` line (the why) before patterns.
 
-- `product.md` — product purpose, target users, key features, business goals
-- `tech.md` — frameworks, libraries, tools, technical constraints
-- `structure.md` — file organization, naming conventions, import patterns
-- `api-standards.md` — REST conventions, error formats, auth flows, versioning
-- `testing-standards.md` — test patterns, mocking, coverage expectations
-- `code-conventions.md` — naming, import ordering, preferred structures, anti-patterns
-- `security-policies.md` — auth requirements, validation, input sanitization
-- `deployment-workflow.md` — build, env config, deploy steps, rollback, CI/CD
+Note: Kiro's foundational trio (`product.md`/`tech.md`/`structure.md`) is **not**
+adopted — it overlaps `project.md` and `adrs/`, which already own product
+direction, stack, and architecture decisions in our layout.
 
 (In this project, `product.md`/`tech.md`/`structure.md` overlap with `project.md`
 and `adrs/` — prefer those homes and reserve `steering/` for the domain files that
@@ -198,12 +214,12 @@ spreading flat top-level files. Three levels:
 
 | Depth | Example | Use for |
 |---|---|---|
-| 1 | `project.md` | index files only |
-| 2 | `project/tooling.md` | main topic areas |
-| 3 | `project/tooling/bun.md` | specific details |
+| 1 | `auth.md` | a domain (also acts as that domain's index once nested) |
+| 2 | `auth/session.md` | a sub-topic within the domain |
+| 3 | `auth/session/fixation.md` | a specific detail |
 
-Good: `risks/auth/session-fixation.md`. Bad: `auth_session_risk.md` (flat,
-underscores). Prefer a 3-level hierarchy over many top-level files.
+Good: `auth/session/fixation.md`. Bad: `auth_session_risk.md` (flat,
+underscores). Start flat; nest a domain only once its content justifies it.
 
 **Each parent lists its children in a "Related files" section** — this is how
 progressive disclosure threads through the hierarchy, and it's the per-level
