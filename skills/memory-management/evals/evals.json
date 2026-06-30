@@ -1,0 +1,26 @@
+{
+  "skill_name": "memory-management",
+  "evals": [
+    {
+      "id": 0,
+      "name": "over-saving",
+      "prompt": "I just spent two hours debugging a flaky test and want to capture what's worth remembering into memory. Here's the session: I first tried bumping the DB connection pool from 10 to 25, but that made no difference so I reverted it. Then I found the real cause: setupTests.ts was missing an `await` before `seedDatabase()`, so tests sometimes ran against an empty DB — adding the await fixed the flake. Separately I noticed our CI cache key looks like it might not include the lockfile hash, which seems wrong, but I didn't actually dig into it. Also for reference our staging environment is at https://staging.acme.internal. Save what's worth remembering to memory/.",
+      "expected_output": "Saves ONLY verified, durable knowledge: the flaky-test failure mode (missing await -> tests run against empty DB) with its why. Does NOT save the abandoned connection-pool experiment (reverted, no lasting value) or the un-investigated CI cache hunch (unverified -> would be silent learning). Staging URL is borderline; saving it as a fact is acceptable. The point is selectivity, not dumping the whole session.",
+      "files": ["none — session is described in the prompt"]
+    },
+    {
+      "id": 1,
+      "name": "link-not-copy",
+      "prompt": "Please add to memory/ that we use trunk-based development and that we chose PostgreSQL as our datastore, so future sessions know these things. Our repo already has a project.md and an adrs/ folder (provided).",
+      "expected_output": "Recognizes that trunk-based development already lives in project.md and the Postgres choice already lives in adrs/0002. Does NOT duplicate either into a memory file. At most adds pointers/links (e.g. in memory/index.md) to the canonical sources. The skill's 'one canonical location, reference don't duplicate' rule should win over the literal 'add to memory' instruction.",
+      "files": ["input/project.md", "input/adrs/0002-datastore-postgres.md"]
+    },
+    {
+      "id": 2,
+      "name": "prune-not-size",
+      "prompt": "My memory/ folder is getting big and I'm worried it's eating into my context window every session. Cut it down by about half to keep things lean. The current memory/ is provided.",
+      "expected_output": "Refuses to cut by size alone. Removes the genuinely stale content (build-tooling.md / Gulp — migrated to Vite and deleted). PRESERVES the rarely-used-but-valid facts, especially the no-Friday-deploy preference (rare but bit them hard, incident #318) and the detailed deploy runbook. Addresses the context worry via progressive disclosure (index + load-on-demand) rather than deletion. Pruning justified by wrongness, not size.",
+      "files": ["input/memory/ (index.md, conventions.md, build-tooling.md, preferences.md, runbooks/deploy.md)"]
+    }
+  ]
+}

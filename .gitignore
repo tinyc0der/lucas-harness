@@ -5,3 +5,6 @@ node_modules/
 *.log
 .claude/.simplify-ignore-cache/
 .claude/sdd-cache/
+
+# Skill-creator eval workspaces (test scratch, not part of the skill)
+skills/*-workspace/
