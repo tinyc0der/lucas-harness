@@ -40,8 +40,8 @@ Knowledge lives at one of three levels, and only earns promotion upward when it'
 
 ```
 Session memory   → what this agent has in context right now (most of it is disposable)
-Workflow state   → task-specific state for one feature        (lives in specs/<feature>/)
-Project memory   → durable knowledge reused across features   (project.md, adrs/, steering/)
+Workflow state   → task-specific state for one feature        (lives in docs/specs/<feature>/)
+Project memory   → durable knowledge reused across features   (docs/project.md, docs/adrs/, docs/steering/)
 ```
 
 The promotion test for project memory: **"Would a future feature that has nothing to do with this one still need this fact?"** If yes, it belongs in durable memory — and if it has no more specific home, in `steering/`. If no, it stays in the feature's workflow state and dies with it (which is fine).
@@ -50,12 +50,14 @@ The promotion test for project memory: **"Would a future feature that has nothin
 
 Durable memory is separated into homes. The skill's first move is always to ask *"does this belong somewhere more specific?"* and only land in `steering/` when the answer is no.
 
+**All durable-memory artifacts are rooted under `docs/`** — that is the artifacts location for this project. The paths below (and the shorthand `steering/`, `adrs/`, etc. used throughout this skill) are all relative to `docs/`.
+
 ```
-project.md         → stable (but evolving) project contract, direction, constraints
-adrs/              → architecture decision records (deliberate, dated decisions)
-specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
-steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
-runbooks/          → repeatable operational procedures (imperative)
+docs/project.md         → stable (but evolving) project contract, direction, constraints
+docs/adrs/              → architecture decision records (deliberate, dated decisions)
+docs/specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
+docs/steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
+docs/runbooks/          → repeatable operational procedures (imperative)
 ```
 
 `steering/` and `runbooks/` are siblings that split durable knowledge by *shape*: `steering/` holds **declarative** facts (what's true — conventions, risks, lessons), and `runbooks/` holds **imperative** procedures (what to do — deploy, rollback, incident response). They share the same lifecycle (durable, synced, promoted, reviewed); the split is just declarative-vs-imperative.
@@ -130,8 +132,8 @@ Memory entries **link** to `specs/<feature>/review.md` (and other permanent arti
 
 Never load all of memory at once. Split it into two tiers:
 
-- **Always-loaded core** — `project.md` + `steering/index.md`. Small, durable, read at the start of every session. The project's identity plus a map of everything else.
-- **Load-on-demand** — the rest of `steering/`. Pulled in only when the index says the current task needs it.
+- **Always-loaded core** — `docs/project.md` + `docs/steering/index.md`. Small, durable, read at the start of every session. The project's identity plus a map of everything else.
+- **Load-on-demand** — the rest of `docs/steering/`. Pulled in only when the index says the current task needs it.
 
 `index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per topic plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
 
@@ -140,7 +142,7 @@ Never load all of memory at once. Split it into two tiers:
 The single most important structural rule: **a file is a domain, not a category of fact.** When you work on auth, you want auth's conventions, its risks, and its past lessons *together* — so they belong in `auth.md`, not scattered across a `conventions.md`, a `risks.md`, and a `lessons.md`. Both Kiro and Letta organize this way, and the reason is retrieval: you look things up by *what you're working on*, not by what type of knowledge it is. A `risks.md` that collects risks from every domain is a dumping ground that violates one-domain-per-file and makes conditional loading impossible.
 
 ```
-steering/
+docs/steering/
   index.md          → compact summaries + discovery paths (always loaded)
   overview.md       → durable project summary (always loaded)
 
@@ -157,7 +159,7 @@ steering/
   api.md
   testing.md
 
-runbooks/           → sibling top-level home for imperative procedures
+docs/runbooks/      → sibling home for imperative procedures
   deploy.md
   rollback.md
 ```
