@@ -1,6 +1,6 @@
 ---
-name: pull-request-authoring
-description: Drafts a pull request whose description carries enough context to be reviewed cold in a separate session. Use when opening a PR, handing a change to another agent or human for review, or preparing work that will be reviewed later without you present to explain it. Use when a reviewer would otherwise have to reconstruct intent from the diff alone.
+name: create-pull-request
+description: Drafts and opens a pull request whose description carries enough context to be reviewed cold in a separate session. Use when opening a PR, handing a change to another agent or human for review, or preparing work that will be reviewed later without you present to explain it. Use when a reviewer would otherwise have to reconstruct intent from the diff alone. Creates the PR with gh, not just the body text.
 ---
 
 # Pull Request Authoring
@@ -35,14 +35,17 @@ Attach the evidence a reviewer needs
 Self-review the diff as the reviewer will
     │  read your own PR top to bottom; fix what confuses you
     ▼
-Open the PR / hand it off
+Create the PR
+    │  push the branch, then `gh pr create` with the drafted body
+    ▼
+Hand off / report the URL
 ```
 
 ### 1. Confirm the change is review-ready
 
 Before writing a word: the change is scoped to one logical concern, commits are clean, and tests pass. If the diff is over ~1000 lines or mixes refactor with feature, split it first — see `git-workflow-and-versioning` and the splitting strategies in `code-review-and-quality`. A tight diff is the single biggest favor you can do a reviewer.
 
-The branch name is the first thing a reviewer reads — it appears on the PR before the title. An auto-generated name (`claude/pensive-booth-0dc063`) tells them nothing; rename it to describe the change (`docs/pull-request-authoring-skill`) using the `feature/`, `fix/`, `chore/`, `refactor/` conventions in `git-workflow-and-versioning`. If the branch has no upstream yet, `git branch -m <new-name>` is a safe, reversible local rename.
+The branch name is the first thing a reviewer reads — it appears on the PR before the title. An auto-generated name (`claude/pensive-booth-0dc063`) tells them nothing; rename it to describe the change (`docs/create-pull-request-skill`) using the `feature/`, `fix/`, `chore/`, `refactor/` conventions in `git-workflow-and-versioning`. If the branch has no upstream yet, `git branch -m <new-name>` is a safe, reversible local rename.
 
 ### 2. Write the description for a cold reader
 
@@ -94,9 +97,32 @@ A claim without evidence forces the reviewer to re-run your work. Include:
 
 Read your own PR top to bottom — description first, then every hunk of the diff — as if you'd never seen it. Every place you have to pause and reconstruct intent is a place the reviewer will too: add a code comment, a PR comment, or a line in the description. This pass catches leftover debug code, unrelated churn, and unexplained magic values before the reviewer does.
 
-### 5. Hand it off
+### 5. Create the PR
 
-Open the PR (or, for an agent handoff, point the next session at the branch and this description). The description *is* the handoff — if you find yourself adding critical context in a follow-up message instead of the PR body, move it into the PR body.
+Drafting the description is not the deliverable — the open PR is. Actually create it; don't stop at pasting the body into chat and calling it done. Only skip creation when the user explicitly asked for the body text alone, or the work isn't committed yet — in which case say so and stop, rather than silently producing content.
+
+Confirm the change is committed and the branch is pushed, then open the PR with the drafted body. Write the body to a file so the markdown survives the shell verbatim — heredocs and inline quoting mangle backticks, `$`, and blank lines:
+
+```bash
+# Push the branch and set upstream (first push only)
+git push -u origin "$(git rev-parse --abbrev-ref HEAD)"
+
+# Body was drafted in step 2; write it to a temp file, then hand it to gh
+gh pr create \
+  --base main \
+  --title "Optimize public book search with title-first D1 FTS" \
+  --body-file /path/to/scratchpad/pr-body.md
+```
+
+Notes:
+- **`--base`** — target the branch you actually merge into (often `main`; confirm, don't assume).
+- **Draft PRs** — add `--draft` when the work invites early feedback but isn't merge-ready.
+- **No `gh`?** Fall back to `git push` and print the branch's "Create pull request" URL from the push output, or hand the base branch + body to the user to open manually.
+- **Preconditions gh needs** — an authenticated `gh` (`gh auth status`) and a remote. If either is missing, report exactly what's absent instead of retrying blind.
+
+`gh pr create` prints the PR URL on success — report it back so the user (or the next session) can go straight to it. That URL *is* the handoff: if you catch yourself adding critical context in a follow-up message instead of the PR body, move it into the PR body and update with `gh pr edit --body-file`.
+
+For an agent handoff, point the next session at the PR URL (or the branch and this description). The description *is* the handoff.
 
 ## Writing for a Fresh-Context Agent Reviewer
 
@@ -119,6 +145,7 @@ This is the author-side of the fresh-context review discipline in `doubt-driven-
 | "Tests pass, so it works." | "Tests pass" without the output is an assertion, not evidence. Paste the run and say what it exercised. |
 | "It's a small change, skip the template." | Small diffs still hide intent. Two sentences of *why* cost you nothing and save the reviewer a round-trip. |
 | "I'll list open questions if they ask." | An unstated doubt is never discovered — it ships. State it now, while it's cheap. |
+| "I drafted the body — the PR is done." | A body in chat is not a PR. Unless the user asked for text only, run `gh pr create` and report the URL; otherwise nothing was actually opened. |
 
 ## Red Flags
 
@@ -130,6 +157,7 @@ This is the author-side of the fresh-context review discipline in `doubt-driven-
 - The reviewer's first response is a question you could have answered in the description.
 - The diff mixes refactor + feature, or exceeds ~1000 lines with no split rationale.
 - The branch is still named with an auto-generated slug instead of the change.
+- The PR body was drafted but never opened — it lives only in chat, with no PR URL to hand off.
 
 ## Verification
 
@@ -143,3 +171,5 @@ Before opening the PR / handing off, confirm:
 - [ ] `Not touched` and `Risk & rollback` are filled (or explicitly "None").
 - [ ] Every open question or known trade-off is written in the PR body, not left in chat.
 - [ ] You have re-read the full diff as the reviewer will, and fixed every spot that made you pause.
+- [ ] The branch is pushed and the PR is actually created (`gh pr create`), unless the user asked for the body text only.
+- [ ] The PR URL is reported back for handoff.
