@@ -11,7 +11,7 @@ A project should get faster to work in over time. Every session, feature, fix, a
 
 The core skill is **knowing what to keep and where to put it.** Memory is not a dumping ground for everything that happened — it's the small, curated set of facts a future session genuinely needs and could not quickly re-derive. Save too little and the agent hallucinates project conventions; save too much (or save wrong things) and the signal drowns in noise.
 
-This skill is **tool-agnostic**. It assumes a git-backed project but makes no assumptions about Claude Code, Cursor, or any specific tool's memory mechanism. Git is the common substrate: durable memory lives in tracked files, and changes to it go through reviewable commits.
+This skill is **tool-agnostic**. It assumes a git-backed project but makes no assumptions about Claude Code, Cursor, or any specific tool's memory mechanism. Git is the common substrate: durable memory lives in tracked files, and changes to it go through reviewable commits. The one place it touches the tool layer is a thin *pointer* in the agent's rules file (`CLAUDE.md`/`AGENTS.md`/…) that signposts memory's location — never a copy of it (see Bootstrap).
 
 ## When to Use
 
@@ -40,8 +40,8 @@ Knowledge lives at one of three levels, and only earns promotion upward when it'
 
 ```
 Session memory   → what this agent has in context right now (most of it is disposable)
-Workflow state   → task-specific state for one feature        (lives in specs/<feature>/)
-Project memory   → durable knowledge reused across features   (project.md, adrs/, steering/)
+Workflow state   → task-specific state for one feature        (lives in docs/specs/<feature>/)
+Project memory   → durable knowledge reused across features   (docs/project.md, docs/adrs/, docs/steering/)
 ```
 
 The promotion test for project memory: **"Would a future feature that has nothing to do with this one still need this fact?"** If yes, it belongs in durable memory — and if it has no more specific home, in `steering/`. If no, it stays in the feature's workflow state and dies with it (which is fine).
@@ -50,13 +50,17 @@ The promotion test for project memory: **"Would a future feature that has nothin
 
 Durable memory is separated into homes. The skill's first move is always to ask *"does this belong somewhere more specific?"* and only land in `steering/` when the answer is no.
 
+**All durable-memory artifacts are rooted under `docs/`** — that is the artifacts location for this project. The paths below (and the shorthand `steering/`, `adrs/`, etc. used throughout this skill) are all relative to `docs/`.
+
 ```
-project.md         → stable (but evolving) project contract, direction, constraints
-adrs/              → architecture decision records (deliberate, dated decisions)
-specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
-steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
-runbooks/          → repeatable operational procedures (imperative)
+docs/project.md         → stable (but evolving) project contract, direction, constraints
+docs/adrs/              → architecture decision records (deliberate, dated decisions); adrs/index.md maps them
+docs/specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
+docs/steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
+docs/runbooks/          → repeatable operational procedures (imperative); runbooks/index.md maps them
 ```
+
+Each residue directory — `docs/steering/`, `docs/adrs/`, and `docs/runbooks/` — carries its own `index.md`: a compact map (one-line summary + path per entry) so a session can find the right file without reading the whole directory.
 
 `steering/` and `runbooks/` are siblings that split durable knowledge by *shape*: `steering/` holds **declarative** facts (what's true — conventions, risks, lessons), and `runbooks/` holds **imperative** procedures (what to do — deploy, rollback, incident response). They share the same lifecycle (durable, synced, promoted, reviewed); the split is just declarative-vs-imperative.
 
@@ -107,6 +111,20 @@ The skill operates in one of two modes, chosen by the state of `steering/`:
 
 **Bootstrap** — `steering/` is empty or missing its core files. Generate the initial memory by *analyzing the codebase*: README, config and dependency files, directory structure, naming and import patterns. Extract patterns (per the Golden Rule), don't interrogate the user for what the code already shows. The research areas — product/direction, tech/stack, structure/conventions, and any domain patterns — are independent and can be gathered in parallel. Present the result for review before treating it as the source of truth.
 
+**Bridge the agent's rules file to memory (pointer only).** After bootstrap writes the durable homes, add a short block to whichever rules file the project's agent already uses — `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.github/copilot-instructions.md`, etc. (detect the existing one; create `AGENTS.md` only if none exists and the user wants it). This block does **not** duplicate memory — it is a signpost so a fresh agent session discovers memory exists and knows where to look:
+
+```markdown
+## Project memory
+Durable knowledge lives under `docs/`. Read these at session start:
+- `docs/project.md` — project contract, direction, constraints
+- `docs/steering/index.md` — conventions, risks, lessons (map)
+- `docs/adrs/index.md` — architecture decisions (map)
+- `docs/runbooks/index.md` — operational procedures (map)
+Load individual files on demand via the indexes; don't inline their contents here.
+```
+
+Keep it to those pointers. The rules file is a *bridge*, not a second copy of memory — the canonical content stays in `docs/`, and this block is the one place the tool-specific layer touches the tool-agnostic memory system (**link, don't restate**). On Sync, refresh this block only if the set of top-level homes changes (e.g. a new `docs/runbooks/` appears); the indexes it points to absorb everything else.
+
 **Sync** — `steering/` exists; keep it aligned with reality. This is the ongoing maintenance loop, and it works as **bidirectional drift detection**:
 
 - **Memory → Code**: an entry references something that no longer exists (a deleted file, a removed tool, a dropped convention) → a **prune candidate**. Flag it; don't auto-delete.
@@ -130,17 +148,17 @@ Memory entries **link** to `specs/<feature>/review.md` (and other permanent arti
 
 Never load all of memory at once. Split it into two tiers:
 
-- **Always-loaded core** — `project.md` + `steering/index.md`. Small, durable, read at the start of every session. The project's identity plus a map of everything else.
-- **Load-on-demand** — the rest of `steering/`. Pulled in only when the index says the current task needs it.
+- **Always-loaded core** — `docs/project.md` + the three directory indexes (`docs/steering/index.md`, `docs/adrs/index.md`, `docs/runbooks/index.md`). Small, durable, read at the start of every session. The project's identity plus a map of everything else.
+- **Load-on-demand** — the rest of `docs/steering/`, `docs/adrs/`, and `docs/runbooks/`. Pulled in only when an index says the current task needs it.
 
-`index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per topic plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
+Each `index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per entry plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
 
 ## How Memory Is Organized: Organize by Domain, Not by Knowledge-Type
 
 The single most important structural rule: **a file is a domain, not a category of fact.** When you work on auth, you want auth's conventions, its risks, and its past lessons *together* — so they belong in `auth.md`, not scattered across a `conventions.md`, a `risks.md`, and a `lessons.md`. Both Kiro and Letta organize this way, and the reason is retrieval: you look things up by *what you're working on*, not by what type of knowledge it is. A `risks.md` that collects risks from every domain is a dumping ground that violates one-domain-per-file and makes conditional loading impossible.
 
 ```
-steering/
+docs/steering/
   index.md          → compact summaries + discovery paths (always loaded)
   overview.md       → durable project summary (always loaded)
 
@@ -157,9 +175,15 @@ steering/
   api.md
   testing.md
 
-runbooks/           → sibling top-level home for imperative procedures
+docs/runbooks/      → sibling home for imperative procedures
+  index.md          → compact summaries + discovery paths (always loaded)
   deploy.md
   rollback.md
+
+docs/adrs/          → architecture decision records
+  index.md          → compact summaries + discovery paths (always loaded)
+  0001-....md
+  0002-....md
 ```
 
 **The routing rule that kills the ambiguity:** domain-specific knowledge goes in its domain file; only knowledge with *no single domain* goes in a cross-cutting type file. An auth token-lifetime rule → `auth.md`. A risk found in billing → `billing.md`. A truly project-wide rule like "no default exports" → `conventions.md`. There is no catch-all `risks.md` or `lessons.md`.
@@ -227,7 +251,7 @@ Before considering memory work complete:
 - [ ] The knowledge was routed to the right home; nothing duplicates `project.md`, an ADR, or a spec folder.
 - [ ] Every fact has exactly one canonical location; everything else links to it.
 - [ ] The change went through a reviewable diff (commit/PR), not a silent in-place edit.
-- [ ] `steering/index.md` is updated so a future session can find the new content without reading everything.
+- [ ] The relevant directory index (`docs/steering/index.md`, `docs/adrs/index.md`, or `docs/runbooks/index.md`) is updated so a future session can find the new content without reading everything.
 - [ ] Each file covers one concern; tiny/overlapping files were merged, multi-topic files split.
 - [ ] Any pruning removed something *stale or wrong*, and preserved stable-but-rare facts.
 - [ ] Runbooks link to real scripts/CI rather than restating commands.
