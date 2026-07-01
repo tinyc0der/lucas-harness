@@ -54,11 +54,13 @@ Durable memory is separated into homes. The skill's first move is always to ask 
 
 ```
 docs/project.md         → stable (but evolving) project contract, direction, constraints
-docs/adrs/              → architecture decision records (deliberate, dated decisions)
+docs/adrs/              → architecture decision records (deliberate, dated decisions); adrs/index.md maps them
 docs/specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
 docs/steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
-docs/runbooks/          → repeatable operational procedures (imperative)
+docs/runbooks/          → repeatable operational procedures (imperative); runbooks/index.md maps them
 ```
+
+Each residue directory — `docs/steering/`, `docs/adrs/`, and `docs/runbooks/` — carries its own `index.md`: a compact map (one-line summary + path per entry) so a session can find the right file without reading the whole directory.
 
 `steering/` and `runbooks/` are siblings that split durable knowledge by *shape*: `steering/` holds **declarative** facts (what's true — conventions, risks, lessons), and `runbooks/` holds **imperative** procedures (what to do — deploy, rollback, incident response). They share the same lifecycle (durable, synced, promoted, reviewed); the split is just declarative-vs-imperative.
 
@@ -132,10 +134,10 @@ Memory entries **link** to `specs/<feature>/review.md` (and other permanent arti
 
 Never load all of memory at once. Split it into two tiers:
 
-- **Always-loaded core** — `docs/project.md` + `docs/steering/index.md`. Small, durable, read at the start of every session. The project's identity plus a map of everything else.
-- **Load-on-demand** — the rest of `docs/steering/`. Pulled in only when the index says the current task needs it.
+- **Always-loaded core** — `docs/project.md` + the three directory indexes (`docs/steering/index.md`, `docs/adrs/index.md`, `docs/runbooks/index.md`). Small, durable, read at the start of every session. The project's identity plus a map of everything else.
+- **Load-on-demand** — the rest of `docs/steering/`, `docs/adrs/`, and `docs/runbooks/`. Pulled in only when an index says the current task needs it.
 
-`index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per topic plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
+Each `index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per entry plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
 
 ## How Memory Is Organized: Organize by Domain, Not by Knowledge-Type
 
@@ -160,8 +162,14 @@ docs/steering/
   testing.md
 
 docs/runbooks/      → sibling home for imperative procedures
+  index.md          → compact summaries + discovery paths (always loaded)
   deploy.md
   rollback.md
+
+docs/adrs/          → architecture decision records
+  index.md          → compact summaries + discovery paths (always loaded)
+  0001-....md
+  0002-....md
 ```
 
 **The routing rule that kills the ambiguity:** domain-specific knowledge goes in its domain file; only knowledge with *no single domain* goes in a cross-cutting type file. An auth token-lifetime rule → `auth.md`. A risk found in billing → `billing.md`. A truly project-wide rule like "no default exports" → `conventions.md`. There is no catch-all `risks.md` or `lessons.md`.
@@ -229,7 +237,7 @@ Before considering memory work complete:
 - [ ] The knowledge was routed to the right home; nothing duplicates `project.md`, an ADR, or a spec folder.
 - [ ] Every fact has exactly one canonical location; everything else links to it.
 - [ ] The change went through a reviewable diff (commit/PR), not a silent in-place edit.
-- [ ] `steering/index.md` is updated so a future session can find the new content without reading everything.
+- [ ] The relevant directory index (`docs/steering/index.md`, `docs/adrs/index.md`, or `docs/runbooks/index.md`) is updated so a future session can find the new content without reading everything.
 - [ ] Each file covers one concern; tiny/overlapping files were merged, multi-topic files split.
 - [ ] Any pruning removed something *stale or wrong*, and preserved stable-but-rare facts.
 - [ ] Runbooks link to real scripts/CI rather than restating commands.
