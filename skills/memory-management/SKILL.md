@@ -201,6 +201,32 @@ docs/adrs/          → architecture decision records
 
 **Runbooks are memory's imperative half — their own top-level home.** Most of memory is declarative (facts, conventions, lessons) and lives in `steering/`; a runbook is an ordered, executable procedure for a recurring operation, so it sits in a sibling `runbooks/` directory rather than inside `steering/`. Keep them honest with one rule: **link, don't restate** — a runbook references the actual scripts, CI config, and `steering/commands.md` rather than copying command text that will drift.
 
+## Monorepos: Two-Level Memory
+
+A monorepo breaks the single-root assumption — one flat `docs/steering/` covering many packages stops being a *small* always-loaded core, and index entries from unrelated packages become noise. The fix is to mirror the repo's own structure: **a shared root plus per-package memory.** This is the "does this belong somewhere more specific?" routing rule applied one level up — the coarsest domain *is* the package.
+
+```
+docs/                         # repo-wide (shared substrate)
+  project.md                  # the monorepo as a whole: what it is, why it's split this way
+  steering/
+    index.md                  # maps repo-wide steering AND points to each package's memory
+    conventions.md            # rules that apply across ALL packages
+    commands.md               # workspace build/test/release (turbo/nx/pnpm) + env quirks
+    monorepo.md               # split rationale, dependency-graph rules, versioning strategy
+  adrs/                       # decisions affecting multiple packages
+  runbooks/                   # repo-wide deploy/rollback
+
+packages/<pkg>/docs/          # per-package memory, co-located with its code
+  steering/index.md + <domain>.md
+  adrs/                       # decisions scoped to just this package
+```
+
+**Routing rule:** a fact that affects **one package** lives in that package's `docs/`; a fact that affects **multiple packages or the workspace itself** (shared tooling, the release flow, a cross-package contract, "all packages use X") lives in the root `docs/`. A cross-package contract is a deliberate decision → a root-level ADR, linked from both packages' indexes.
+
+**Loading stays progressive:** always-load the root `project.md` + root `steering/index.md`; when a session works in `packages/foo`, it *also* loads `packages/foo/docs/steering/index.md`. Never load every package's index at once — only the root's plus the active package's. The root index lists where each package's memory lives, so discovery still flows from one entry point. Keep the rules-file pointer block in the root, and add a local pointer in a package's own `CLAUDE.md`/`AGENTS.md` if it has one.
+
+**Start lighter, split when justified.** For a small monorepo, skip the per-package roots and treat **each package as a domain file** in the root — `steering/foo.md`, `steering/bar.md`. That's the existing "one domain per file, nest as it grows" rule with package = domain. Promote a package to its own co-located `packages/<pkg>/docs/` only when its single file grows into 2+ concepts — the same split trigger used everywhere else.
+
 ## Pruning: Cut for Wrongness, Not Size
 
 Memory hygiene is two-sided. Sprawl is one failure; **over-compression is the equal and opposite failure.**
