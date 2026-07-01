@@ -11,7 +11,7 @@ A project should get faster to work in over time. Every session, feature, fix, a
 
 The core skill is **knowing what to keep and where to put it.** Memory is not a dumping ground for everything that happened — it's the small, curated set of facts a future session genuinely needs and could not quickly re-derive. Save too little and the agent hallucinates project conventions; save too much (or save wrong things) and the signal drowns in noise.
 
-This skill is **tool-agnostic**. It assumes a git-backed project but makes no assumptions about Claude Code, Cursor, or any specific tool's memory mechanism. Git is the common substrate: durable memory lives in tracked files, and changes to it go through reviewable commits.
+This skill is **tool-agnostic**. It assumes a git-backed project but makes no assumptions about Claude Code, Cursor, or any specific tool's memory mechanism. Git is the common substrate: durable memory lives in tracked files, and changes to it go through reviewable commits. The one place it touches the tool layer is a thin *pointer* in the agent's rules file (`CLAUDE.md`/`AGENTS.md`/…) that signposts memory's location — never a copy of it (see Bootstrap).
 
 ## When to Use
 
@@ -110,6 +110,20 @@ A catalog rots on every commit and adds nothing a `ls` couldn't show; a pattern 
 The skill operates in one of two modes, chosen by the state of `steering/`:
 
 **Bootstrap** — `steering/` is empty or missing its core files. Generate the initial memory by *analyzing the codebase*: README, config and dependency files, directory structure, naming and import patterns. Extract patterns (per the Golden Rule), don't interrogate the user for what the code already shows. The research areas — product/direction, tech/stack, structure/conventions, and any domain patterns — are independent and can be gathered in parallel. Present the result for review before treating it as the source of truth.
+
+**Bridge the agent's rules file to memory (pointer only).** After bootstrap writes the durable homes, add a short block to whichever rules file the project's agent already uses — `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.github/copilot-instructions.md`, etc. (detect the existing one; create `AGENTS.md` only if none exists and the user wants it). This block does **not** duplicate memory — it is a signpost so a fresh agent session discovers memory exists and knows where to look:
+
+```markdown
+## Project memory
+Durable knowledge lives under `docs/`. Read these at session start:
+- `docs/project.md` — project contract, direction, constraints
+- `docs/steering/index.md` — conventions, risks, lessons (map)
+- `docs/adrs/index.md` — architecture decisions (map)
+- `docs/runbooks/index.md` — operational procedures (map)
+Load individual files on demand via the indexes; don't inline their contents here.
+```
+
+Keep it to those pointers. The rules file is a *bridge*, not a second copy of memory — the canonical content stays in `docs/`, and this block is the one place the tool-specific layer touches the tool-agnostic memory system (**link, don't restate**). On Sync, refresh this block only if the set of top-level homes changes (e.g. a new `docs/runbooks/` appears); the indexes it points to absorb everything else.
 
 **Sync** — `steering/` exists; keep it aligned with reality. This is the ongoing maintenance loop, and it works as **bidirectional drift detection**:
 
