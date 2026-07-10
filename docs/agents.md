@@ -41,7 +41,7 @@ Pick this when there's a repeatable workflow you'd otherwise re-explain every ti
 ### Slash command (orchestrator — fan-out)
 Pick this only when **independent** investigations can run in parallel and produce reports that a single agent then merges.
 
-- `/ship` → fans out to `code-reviewer` + `security-auditor` + `test-engineer` in parallel, then synthesizes their reports into a go/no-go decision
+- `/ship` → fans out to `code-reviewer` + `security-auditor` + `test-engineer` in parallel, synthesizes their reports into a go/no-go decision, then runs GO-only `memory-management` closeout sequentially
 
 This is the only orchestration pattern this repo endorses. See [references/orchestration-patterns.md](../references/orchestration-patterns.md) for the full pattern catalog and anti-patterns.
 
@@ -68,6 +68,8 @@ Is the work a single perspective on a single artifact?
         merge phase (main agent)
                   ↓
         go/no-go decision + rollback plan
+                  ↓ GO
+        memory-management closeout
 ```
 
 Why this works:
@@ -75,6 +77,7 @@ Why this works:
 - They have no dependencies on each other → genuine parallelism, real wall-clock savings
 - Each runs in a fresh context window → main session stays uncluttered
 - The merge step is small and benefits from full context, so it stays in the main agent
+- Memory closeout runs only after the merged decision; it is not a fourth persona in the fan-out
 
 ## Worked example: invalid orchestration (do not build this)
 

@@ -19,68 +19,71 @@
 ## Problem Statement
 
 How might we help an agent (in any vibe-coding tool, not just Claude Code) keep a
-project's `steering/` directory durable, relevant, and trustworthy — so future
+project's `docs/steering/` directory durable, relevant, and trustworthy — so future
 sessions start from real knowledge instead of re-deriving it, without polluting
 memory with unverified one-off assumptions?
 
 ## Recommended Direction
 
 A tool-agnostic skill that owns one job: **route durable knowledge to the right
-home and keep `steering/` to only what the other artifacts don't already cover.**
+home and keep `docs/steering/` to only what the other artifacts don't already cover.**
 
 The project separates durable knowledge into clear homes:
 
 ```
-project.md         → stable (but evolving) project contract, direction, constraints
-adrs/              → architecture decision records
-specs/<feature>/   → per-feature workflow lifecycle: intent → spec → plan → review → ship
-steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
-runbooks/          → repeatable operational procedures (imperative)
+docs/project.md          → stable (but evolving) project contract, direction, constraints
+docs/decisions/          → architecture decision records
+docs/specs/<slug>/       → per-feature workflow lifecycle: spec → plan → memory delta → review → ship
+docs/steering/           → durable cross-workflow knowledge that fits nowhere above (declarative)
+docs/runbooks/           → repeatable operational procedures (imperative)
 ```
 
-`specs/<feature>/` IS the workflow folder — organized by feature rather than an
+`docs/specs/<slug>/` IS the workflow folder — organized by feature rather than an
 abstract workflow id. Each feature's folder holds its whole journey:
 
 ```
-specs/<feature>/
-  intent.md        → approved user contract (goal, success criteria)
+docs/specs/<slug>/
   spec.md          → intent converted to a spec
   plan.md          → task graph / task ledger
+  memory-delta.md  → proposed durable updates discovered during this feature
   review.md        → review results
   ship.md          → launch / deployment record
-  memory-delta.md  → proposed memory updates discovered during this feature
-  ...
 ```
 
-`steering/` is the residue. The skill's first move is always to ask "does this
-belong in project.md, an ADR, or this feature's spec folder instead?" — and only
-promote to `steering/` when the answer is no.
+`docs/steering/` is the residue. The skill's first move is always to ask "does
+this belong in `docs/project.md`, `docs/decisions/`, this feature's spec folder,
+or `docs/runbooks/` instead?" — and only route it to `docs/steering/` when the
+answer is no.
 
 The skill rests on two ideas from principles.md:
 
 1. **The three-tier model** — Session memory → Workflow state → Project memory.
-   In this layout, workflow state lives in `specs/<feature>/`. Knowledge is
+   In this layout, workflow state lives in `docs/specs/<slug>/`. Knowledge is
    *promoted* up this chain only when it is useful, scoped, evidence-backed, and
    reviewable. Most session context should never become project memory. The
    promotion test: *"would a future feature with nothing to do with this one
-   still need this fact?"* — if yes, promote to `steering/`; if no, it stays in the
-   spec folder.
+   still need this fact?"* — if yes, route it to its canonical durable home; if
+   no, it stays in the spec folder.
 
 2. **The memory-delta → PR pattern** — Discovered knowledge lands in the feature's
-   `specs/<feature>/memory-delta.md` during the work. At closeout it is promoted
-   to `steering/` via a git branch + PR, not by writing durable memory in place.
-   The PR *is* the review and provenance trail — git already gives diff, history,
-   and approval, so no hand-rolled `proposed-updates/` queue is needed. Nothing
-   becomes durable memory without passing through a reviewable change.
+   `docs/specs/<slug>/memory-delta.md` during the work. At closeout each verified
+   item is promoted only after a GO decision. Resolve repository-versus-package
+   scope first, then route by type to that memory root's `project.md`,
+   `decisions/`, `steering/`, or `runbooks/` through a git branch + PR. Record a
+   disposition for every candidate rather than silently dropping it. A NO-GO
+   leaves the delta unpromoted. The PR *is* the review and provenance trail — git
+   already gives diff, history, and approval, so no hand-rolled
+   `proposed-updates/` queue is needed. Nothing becomes durable memory without
+   passing through a reviewable change.
 
 ## What steering/ Should Capture (and not)
 
 | Goes elsewhere | Belongs in steering/ |
 |---|---|
-| Product direction → `project.md` | Conventions the code follows but no doc states |
-| Architecture decisions → `adrs/` | Build / test / verify commands and env quirks |
-| Feature requirements → `specs/<feature>/` | Known risks and fragile areas found while working |
-| Per-feature lifecycle → `specs/<feature>/` | Recurring failure modes |
+| Product direction → `docs/project.md` | Conventions the code follows but no doc states |
+| Architecture decisions → `docs/decisions/` | Build / test / verify commands and env quirks |
+| Feature requirements → `docs/specs/<slug>/` | Known risks and fragile areas found while working |
+| Per-feature lifecycle → `docs/specs/<slug>/` | Recurring failure modes |
 | | Lessons from completed features (tried X, failed because Y) |
 | | User/team working preferences too informal for a spec |
 
@@ -112,11 +115,11 @@ enumeration of what's already visible in the code, it doesn't belong in memory.
 
 Split memory into two tiers (adapted from Letta's `initializing-memory`):
 
-- **Always-loaded core** — `project.md` + `steering/index.md`. Small, durable,
-  read at the start of every session. Identity of the project + a map of what
-  else exists.
-- **Load-on-demand** — the rest of `steering/`. Pulled in only when the index says
-  the current task needs it.
+- **Always-loaded core** — `docs/project.md` plus `docs/steering/index.md`,
+  `docs/decisions/index.md`, and `docs/runbooks/index.md`. Small, durable, read at
+  the start of every session: the project's identity plus maps of everything else.
+- **Load-on-demand** — the rest of `docs/steering/`, `docs/decisions/`, and
+  `docs/runbooks/`. Pulled in only when an index says the current task needs it.
 
 This split is what makes progressive disclosure work: the core is cheap enough to
 always load, and it carries enough signal to decide what *not* to load.
@@ -132,9 +135,8 @@ one-domain-per-file and conditional loading. There is **no** catch-all `risks.md
 or `lessons.md`.
 
 ```
-steering/             → declarative durable knowledge
+docs/steering/       → declarative durable knowledge
   index.md          → compact summaries + discovery paths (always loaded)
-  overview.md       → durable project summary (always loaded)
 
   # cross-cutting type files — only for genuinely project-wide knowledge:
   conventions.md    → global rules (naming, no default exports, imports)
@@ -148,7 +150,8 @@ steering/             → declarative durable knowledge
   api.md
   testing.md
 
-runbooks/             → sibling top-level home for imperative procedures
+docs/runbooks/       → sibling top-level home for imperative procedures
+  index.md
   deploy.md
   rollback.md
   incident-db-failover.md
@@ -163,7 +166,7 @@ subfolder.** Most of memory is declarative (facts, conventions, lessons) and liv
 in `steering/`; a runbook is an ordered, executable procedure for a recurring
 operation. It's durable and cross-workflow, owned by no spec or ADR, but distinct
 in *shape* from declarative knowledge — so it sits in a sibling `runbooks/`
-directory alongside `steering/` and `adrs/`. Two rules keep them honest:
+directory alongside `docs/steering/` and `docs/decisions/`. Two rules keep them honest:
 
 - **Link, don't restate** — a runbook references the actual scripts, CI config,
   and `commands.md` rather than copying command text that will drift. One
@@ -178,12 +181,12 @@ each is a *domain*, not a knowledge-type: `api-standards.md`, `testing.md`,
 `deployment.md`. Each opens with a `## Philosophy` line (the why) before patterns.
 
 Note: Kiro's foundational trio (`product.md`/`tech.md`/`structure.md`) is **not**
-adopted — it overlaps `project.md` and `adrs/`, which already own product
+adopted — it overlaps `docs/project.md` and `docs/decisions/`, which already own product
 direction, stack, and architecture decisions in our layout.
 
 (In this project, `product.md`/`tech.md`/`structure.md` overlap with `project.md`
-and `adrs/` — prefer those homes and reserve `steering/` for the domain files that
-have no other home.)
+and `docs/decisions/` — prefer those homes and reserve `docs/steering/` for the
+domain files that have no other home.)
 
 **One domain per file.** Three sources agree (Kiro "focus", Letta "do not
 collapse distinct topics", principles.md indexed memory): a file covers exactly
@@ -244,16 +247,18 @@ by a future session.
 
 ## Two Modes: Bootstrap and Sync (cc-sdd)
 
-The skill has two operational modes, detected by the state of `steering/`:
+The skill has two operational modes, detected by the state of the durable core:
 
-- **Bootstrap** (memory is empty or missing core files) — generate the initial
-  `steering/` by *analyzing the codebase*: README, configs, dependency manifests,
-  directory structure. Extract the patterns (per the Golden Rule), don't
-  interrogate the user for what the code already shows. Research areas (product,
-  tech, structure, domain patterns) are independent and can run in parallel.
-- **Sync** (memory exists) — reconcile memory against the current code and
-  propose updates. This is the ongoing maintenance loop and where most triggers
-  below fire.
+- **Bootstrap** (`docs/project.md` or any of `docs/steering/index.md`,
+  `docs/decisions/index.md`, and `docs/runbooks/index.md` is missing) — generate
+  or repair the core by *analyzing the codebase*: README, configs, dependency
+  manifests, and directory structure. Extract the patterns (per the Golden
+  Rule), don't interrogate the user for what the code already shows. Research
+  areas (product, tech, structure, domain patterns) are independent and can run
+  in parallel.
+- **Sync** (the durable core exists) — reconcile memory against the current code
+  and propose updates. This is the ongoing maintenance loop and where most
+  triggers below fire.
 
 **Sync is bidirectional drift detection:**
 - **Memory → Code**: an entry references something that no longer exists → a
@@ -270,13 +275,16 @@ human-authored entry. When in doubt, add rather than replace.
 This is **one skill** covering both saving and pruning — pruning is a trigger,
 not a separate process.
 
-- A feature ships → promote its `memory-delta.md` to `steering/` in **one batched
-  PR** (all the feature's verified lessons in a single reviewable change, not a PR
-  per fact). Memory entries **link** to `specs/<feature>/review.md` for evidence
-  rather than copying it — the spec folder is kept permanently.
+- A feature gets a GO ship decision → review `docs/specs/<slug>/memory-delta.md`,
+  resolve scope, route each verified item to its canonical home, record every
+  disposition, and promote the accepted set in **one batched PR** (not a PR per
+  fact). A NO-GO leaves the delta unpromoted. Memory entries **link** to
+  `docs/specs/<slug>/review.md` for evidence rather than copying it — the spec
+  folder is kept permanently.
 - The user corrects behavior or states a preference → capture it as evidence-backed.
 - A failure is verified and reproducible → record the failure mode.
-- A session starts and feels familiar → load only the *relevant* memory via index.
+- A session starts and feels familiar → load the four-file core, then only the
+  *relevant* memory via its indexes.
 - Memory looks stale or contradicts the live codebase → **prune**: update,
   supersede, or remove (same skill, same branch + PR flow).
 
@@ -288,8 +296,9 @@ few extra tokens cost. Do not collapse distinct topics just to reduce file count
 
 ## Key Assumptions to Validate
 
-- [ ] Agents will actually consult `steering/index.md` before loading files, rather
-      than reading everything (test by checking session-start behavior).
+- [ ] Agents will actually consult the steering, decisions, and runbooks indexes
+      before loading leaf files, rather than reading everything (test by checking
+      session-start behavior).
 - [ ] The ADR-vs-lesson boundary is clear enough that agents route consistently.
 - [ ] A branch + PR per memory change isn't too heavy for fast/solo workflows
       (fallback: batch deltas, one PR at feature ship rather than per-fact).
@@ -308,7 +317,7 @@ schema, and automated audit tooling. Describe the audit *behavior*, not a script
 
 ## Not Doing (and Why)
 
-- **Not re-storing project.md / adrs / specs content** — duplication is the main
+- **Not re-storing project.md / decisions / specs content** — duplication is the main
   failure mode; memory captures the gaps between those docs.
 - **Not a Claude-Code-only design** — no hardcoded `~/.claude` paths or the
   global user/feedback/project/reference taxonomy; the skill must run anywhere.
@@ -335,8 +344,8 @@ schema, and automated audit tooling. Describe the audit *behavior*, not a script
   trigger, not a separate process.
 - **Promote via branch + PR, not a staging folder** → memory changes go through a
   reviewable git change; git provides diff, history, provenance, and approval.
-- **`specs/<feature>/` is kept permanently** → memory *links* to
-  `specs/<feature>/review.md` for evidence rather than copying it; one canonical
+- **`docs/specs/<slug>/` is kept permanently** → memory *links* to
+  `docs/specs/<slug>/review.md` for evidence rather than copying it; one canonical
   source, no duplication.
 - **One batched PR at feature ship, not per-fact** → all of a feature's verified
   lessons land in a single reviewable change; keeps friction low without losing

@@ -117,7 +117,7 @@ The repo ships 8 slash commands under `.gemini/commands/`: 7 lifecycle commands 
 | `/test` | Run TDD workflow — red, green, refactor |
 | `/review` | Five-axis code review |
 | `/code-simplify` | Reduce complexity without changing behavior |
-| `/ship` | Pre-launch checklist via parallel persona fan-out |
+| `/ship` | Parallel launch review and decision; `shipping-and-launch` delegates GO-only closeout to `memory-management` |
 | `/webperf` | Audit browser-facing apps for Core Web Vitals and performance issues |
 
 Each command invokes the corresponding skill automatically — no manual skill loading required.

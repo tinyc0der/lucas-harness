@@ -35,13 +35,13 @@ ADRs capture the reasoning behind significant technical decisions. They're the h
 
 ### ADR Template
 
-Store ADRs in `docs/decisions/` with sequential numbering — a global, cross-cutting artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`):
+Resolve scope before writing (see `memory-management` and the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). Store repo-wide or cross-package ADRs as `docs/decisions/NNNN-*.md`; in a monorepo with package-local memory, store a decision owned by exactly one package as `packages/<pkg>/docs/decisions/NNNN-*.md`. Use four-digit sequential numbering within the chosen scope. Whenever an ADR is created or its status changes, create or update the corresponding `docs/decisions/index.md` or `packages/<pkg>/docs/decisions/index.md` with its title, status, one-line summary, and relative path so agents can discover it without loading every decision.
 
 ```markdown
-# ADR-001: Use PostgreSQL for primary database
+# ADR-0001: Use PostgreSQL for primary database
 
 ## Status
-Accepted | Superseded by ADR-XXX | Deprecated
+Accepted | Superseded by ADR-NNNN | Deprecated
 
 ## Date
 2025-01-15
@@ -132,7 +132,7 @@ function calculateTotal(items: CartItem[]): number {
  * If called after hydration, it causes a flash of unstyled content
  * because the theme context isn't available during SSR.
  *
- * See ADR-003 for the full design rationale.
+ * See ADR-0003 for the full design rationale.
  */
 export function initializeTheme(theme: Theme): void {
   // ...
@@ -271,6 +271,7 @@ Special consideration for AI agent context:
 After documenting:
 
 - [ ] ADRs exist for all significant architectural decisions
+- [ ] The corresponding root or package-local decisions index lists every ADR in that scope with its current status, summary, and path
 - [ ] README covers quick start, commands, and architecture overview
 - [ ] API functions have parameter and return type documentation
 - [ ] Known gotchas are documented inline where they matter

@@ -20,7 +20,8 @@ docs/         → Setup guides for different tools
 **Build:** incremental-implementation, test-driven-development, context-engineering, source-driven-development, doubt-driven-development, frontend-ui-engineering, api-and-interface-design
 **Verify:** browser-testing-with-devtools, debugging-and-error-recovery
 **Review:** code-review-and-quality, code-simplification, security-and-hardening, performance-optimization
-**Ship:** git-workflow-and-versioning, create-pull-request, ci-cd-and-automation, deprecation-and-migration, documentation-and-adrs, observability-and-instrumentation, shipping-and-launch
+**Ship:** git-workflow-and-versioning, create-pull-request, ci-cd-and-automation, deprecation-and-migration, documentation-and-adrs, observability-and-instrumentation, shipping-and-launch, memory-management
+
 **Route (meta):** using-lucas-harness — discovers the right skill for a single activity, and for a whole incoming ticket classifies its type and dispatches the calibrated flow across the phases above (see its "Routing an Incoming Ticket" section; activates by description, no slash command)
 
 ## Upstream Merge Guide

@@ -1,6 +1,6 @@
 ---
 name: memory-management
-description: Organizes a project's durable memory so future sessions start from real knowledge instead of re-deriving it. Routes each fact to the right home (project.md, ADRs, spec folders, or steering/), promotes lessons through review, and keeps memory pruned and trustworthy. Use whenever a feature ships, the user states a durable preference or correction, a failure is diagnosed, or memory looks stale, sprawling, or contradicts the code — even if the user doesn't say the word "memory." Also use when setting up a project's steering/ directory or deciding where a piece of knowledge belongs.
+description: Organizes a project's durable memory so future sessions start from real knowledge instead of re-deriving it. Routes each fact to the right home (project.md, decisions, spec folders, steering, or runbooks), promotes lessons through review, and keeps memory pruned and trustworthy. Use whenever a feature ships, the user states a durable preference or correction, a failure is diagnosed, or memory looks stale, sprawling, or contradicts the code — even if the user doesn't say the word "memory." Also use when setting up a project's durable-memory core or deciding where a piece of knowledge belongs.
 ---
 
 # Memory Management
@@ -22,13 +22,13 @@ Trigger this skill — even when the user doesn't say "memory":
 - **A failure is diagnosed and reproducible.** The failure mode and its cause are worth keeping.
 - **A session starts and feels familiar** — load the relevant memory rather than re-exploring.
 - **Memory looks stale, sprawling, or wrong** — it contradicts the current code, or files have grown unscannable. Pruning and reorganizing is part of this skill, not a separate one.
-- **Setting up a project's `steering/` directory** for the first time (Bootstrap mode — derive it from the codebase), or deciding where a new piece of knowledge belongs.
+- **Setting up a project's durable-memory core** for the first time (Bootstrap mode — derive it from the codebase), or deciding where a new piece of knowledge belongs.
 
 If a piece of knowledge only matters to the current conversation, it does **not** belong in memory. Memory is for what survives the session.
 
 ## A Note on Terms: Memory vs. `steering/`
 
-**Memory** is the whole durable-knowledge system — `project.md`, `adrs/`, the shipped `specs/` history, and the `steering/` directory together. It is the concept this skill manages.
+**Memory** is the whole durable-knowledge system — `project.md`, `decisions/`, the shipped `specs/` history, `steering/`, and `runbooks/` together. It is the concept this skill manages.
 
 **`steering/`** is one part of that system: the directory holding durable knowledge that has no more specific home. It used to be called `memory/`; it's renamed to `steering/` precisely so "memory" can keep its broader meaning without the directory name colliding with it.
 
@@ -40,27 +40,27 @@ Knowledge lives at one of three levels, and only earns promotion upward when it'
 
 ```
 Session memory   → what this agent has in context right now (most of it is disposable)
-Workflow state   → task-specific state for one feature        (lives in docs/specs/<feature>/)
-Project memory   → durable knowledge reused across features   (docs/project.md, docs/adrs/, docs/steering/)
+Workflow state   → task-specific state for one feature        (lives in docs/specs/<slug>/)
+Project memory   → durable knowledge reused across features   (docs/project.md, docs/decisions/, docs/steering/, docs/runbooks/)
 ```
 
-The promotion test for project memory: **"Would a future feature that has nothing to do with this one still need this fact?"** If yes, it belongs in durable memory — and if it has no more specific home, in `steering/`. If no, it stays in the feature's workflow state and dies with it (which is fine).
+The promotion test for project memory: **"Would a future feature that has nothing to do with this one still need this fact?"** If yes, it belongs in durable memory — and if it has no more specific home, in `steering/`. If no, it stays in the feature's workflow state. Shipped feature folders remain as provenance, but feature-local facts are not promoted into the always-discovered core.
 
 ## Where Knowledge Lives
 
 Durable memory is separated into homes. The skill's first move is always to ask *"does this belong somewhere more specific?"* and only land in `steering/` when the answer is no.
 
-**All durable-memory artifacts are rooted under `docs/`** — that is the artifacts location for this project. The paths below (and the shorthand `steering/`, `adrs/`, etc. used throughout this skill) are all relative to `docs/`.
+**Every durable artifact has a resolved memory root.** The default memory root is repository `docs/`; in a monorepo with package-local memory, knowledge owned by one package uses `packages/<pkg>/docs/`. Resolve that scope before applying the routing rules below. Per-feature workflow state remains in repository `docs/specs/<slug>/` regardless of memory root. The layout shown here is the default root form:
 
 ```
 docs/project.md         → stable (but evolving) project contract, direction, constraints
-docs/adrs/              → architecture decision records (deliberate, dated decisions); adrs/index.md maps them
-docs/specs/<feature>/   → one feature's full lifecycle: intent → spec → plan → review → ship
+docs/decisions/         → architecture decision records (deliberate, dated decisions); decisions/index.md maps them
+docs/specs/<slug>/      → one feature's full lifecycle: spec → plan → memory delta → review → ship
 docs/steering/          → durable cross-workflow knowledge that fits nowhere above (declarative)
 docs/runbooks/          → repeatable operational procedures (imperative); runbooks/index.md maps them
 ```
 
-Each residue directory — `docs/steering/`, `docs/adrs/`, and `docs/runbooks/` — carries its own `index.md`: a compact map (one-line summary + path per entry) so a session can find the right file without reading the whole directory.
+Each durable collection — `<memory-root>/steering/`, `<memory-root>/decisions/`, and `<memory-root>/runbooks/` — carries its own `index.md`: a compact map (one-line summary + path per entry) so a session can find the right file without reading the whole directory.
 
 `steering/` and `runbooks/` are siblings that split durable knowledge by *shape*: `steering/` holds **declarative** facts (what's true — conventions, risks, lessons), and `runbooks/` holds **imperative** procedures (what to do — deploy, rollback, incident response). They share the same lifecycle (durable, synced, promoted, reviewed); the split is just declarative-vs-imperative.
 
@@ -69,8 +69,8 @@ Each residue directory — `docs/steering/`, `docs/adrs/`, and `docs/runbooks/` 
 | Goes elsewhere | Belongs in `steering/` |
 |---|---|
 | Product direction → `project.md` | Conventions the code follows but no doc states |
-| A deliberate architecture decision → `adrs/` | Build / test / verify / deploy commands and env quirks |
-| One feature's requirements → `specs/<feature>/` | Known risks and fragile areas found while working |
+| A deliberate architecture decision → `decisions/` | Build / test / verify / deploy commands and env quirks |
+| One feature's requirements → `specs/<slug>/` | Known risks and fragile areas found while working |
 | A step-by-step operational procedure → `runbooks/` | Recurring failure modes |
 | | Lessons from completed features ("tried X, failed because Y") |
 | | User/team working preferences too informal for a spec |
@@ -107,9 +107,9 @@ A catalog rots on every commit and adds nothing a `ls` couldn't show; a pattern 
 
 ## Two Modes: Bootstrap and Sync
 
-The skill operates in one of two modes, chosen by the state of `steering/`:
+The skill operates in one of two modes, chosen by the state of the durable-memory core:
 
-**Bootstrap** — `steering/` is empty or missing its core files. Generate the initial memory by *analyzing the codebase*: README, config and dependency files, directory structure, naming and import patterns. Extract patterns (per the Golden Rule), don't interrogate the user for what the code already shows. The research areas — product/direction, tech/stack, structure/conventions, and any domain patterns — are independent and can be gathered in parallel. Present the result for review before treating it as the source of truth.
+**Bootstrap** — `docs/project.md` or any required index (`docs/steering/index.md`, `docs/decisions/index.md`, `docs/runbooks/index.md`) is missing. Generate or repair the initial memory by *analyzing the codebase*: README, config and dependency files, directory structure, naming and import patterns. Extract patterns (per the Golden Rule), don't interrogate the user for what the code already shows. The research areas — product/direction, tech/stack, structure/conventions, and any domain patterns — are independent and can be gathered in parallel. Present the result for review before treating it as the source of truth.
 
 **Bridge the agent's rules file to memory (pointer only).** After bootstrap writes the durable homes, add a short block to whichever rules file the project's agent already uses — `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.github/copilot-instructions.md`, etc. (detect the existing one; create `AGENTS.md` only if none exists and the user wants it). This block does **not** duplicate memory — it is a signpost so a fresh agent session discovers memory exists and knows where to look:
 
@@ -118,14 +118,14 @@ The skill operates in one of two modes, chosen by the state of `steering/`:
 Durable knowledge lives under `docs/`. Read these at session start:
 - `docs/project.md` — project contract, direction, constraints
 - `docs/steering/index.md` — conventions, risks, lessons (map)
-- `docs/adrs/index.md` — architecture decisions (map)
+- `docs/decisions/index.md` — architecture decisions (map)
 - `docs/runbooks/index.md` — operational procedures (map)
 Load individual files on demand via the indexes; don't inline their contents here.
 ```
 
 Keep it to those pointers. The rules file is a *bridge*, not a second copy of memory — the canonical content stays in `docs/`, and this block is the one place the tool-specific layer touches the tool-agnostic memory system (**link, don't restate**). On Sync, refresh this block only if the set of top-level homes changes (e.g. a new `docs/runbooks/` appears); the indexes it points to absorb everything else.
 
-**Sync** — `steering/` exists; keep it aligned with reality. This is the ongoing maintenance loop, and it works as **bidirectional drift detection**:
+**Sync** — the durable-memory core exists; keep it aligned with reality. This is the ongoing maintenance loop, and it works as **bidirectional drift detection**:
 
 - **Memory → Code**: an entry references something that no longer exists (a deleted file, a removed tool, a dropped convention) → a **prune candidate**. Flag it; don't auto-delete.
 - **Code → Memory**: a pattern the code now follows that memory doesn't capture yet → an **update candidate**.
@@ -136,20 +136,22 @@ Keep it to those pointers. The rules file is a *bridge*, not a second copy of me
 
 Discovered knowledge does not get written straight into durable memory. It flows through review:
 
-1. **During a feature**, candidate knowledge accumulates in `specs/<feature>/memory-delta.md` — a scratchpad. It is *not* durable memory yet; the feature might get reverted and take its "lessons" with it.
-2. **At ship**, the verified deltas are promoted into `steering/` via a **single batched PR** (all of the feature's lessons in one reviewable change — not a PR per fact). The PR *is* the review and provenance trail: git already provides diff, history, and approval, so there's no need for a hand-rolled staging folder.
-3. **Knowledge discovered outside a feature** (a standalone correction, a preference, an incident with no feature branch) skips the delta scratchpad and goes straight to a `steering/` edit + commit/PR.
+1. **During a feature**, candidate knowledge accumulates in `docs/specs/<slug>/memory-delta.md` — a scratchpad. It is *not* durable memory yet; the feature might get reverted and take its "lessons" with it.
+2. **At ship, resolve scope first.** For each candidate, choose the memory root before choosing the artifact type: use root `docs/` for repo-wide or cross-package knowledge; use `packages/<pkg>/docs/` for knowledge owned by exactly one package in a monorepo with package-local memory.
+3. **GO — review, record, and promote.** Give every candidate a disposition with rationale: accepted, rejected as unverified, or retained as feature-local. Route accepted items within the resolved memory root: project direction or constraints → `<memory-root>/project.md`; deliberate architecture choices → `<memory-root>/decisions/`; declarative conventions, risks, or lessons → `<memory-root>/steering/`; repeatable procedures → `<memory-root>/runbooks/`. At the repository root these resolve to `docs/project.md`, `docs/decisions/`, `docs/steering/`, and `docs/runbooks/`. Promote the accepted set in **one batched PR** rather than one PR per fact, update affected indexes, and record target links in `memory-delta.md`. The PR is the review and provenance trail, so there is no hand-rolled staging folder.
+4. **NO-GO — preserve workflow state.** Record why the launch was blocked, leave every candidate unpromoted in `memory-delta.md`, and make no durable-memory edit. A later GO decision performs the review and promotion.
+5. **Knowledge discovered outside a feature** (a standalone correction, a preference, or an incident with no feature branch) skips the delta scratchpad, resolves root-versus-package scope, and goes straight to its canonical home through a reviewable commit/PR.
 
 The promotion chain for procedural knowledge extends one step further: **delta → lesson → runbook.** After an incident, a lesson ("DB failover needs X") that proves recurring and procedural graduates into a runbook *step*.
 
-Memory entries **link** to `specs/<feature>/review.md` (and other permanent artifacts) for evidence rather than copying it — one canonical source, no duplication.
+Memory entries **link** to `docs/specs/<slug>/review.md` (and other permanent artifacts) for evidence rather than copying it — one canonical source, no duplication.
 
 ## How Memory Gets Loaded: Progressive Disclosure
 
 Never load all of memory at once. Split it into two tiers:
 
-- **Always-loaded core** — `docs/project.md` + the three directory indexes (`docs/steering/index.md`, `docs/adrs/index.md`, `docs/runbooks/index.md`). Small, durable, read at the start of every session. The project's identity plus a map of everything else.
-- **Load-on-demand** — the rest of `docs/steering/`, `docs/adrs/`, and `docs/runbooks/`. Pulled in only when an index says the current task needs it.
+- **Always-loaded core** — `docs/project.md` + the three directory indexes (`docs/steering/index.md`, `docs/decisions/index.md`, `docs/runbooks/index.md`). Small, durable, read at the start of every session. The project's identity plus a map of everything else.
+- **Load-on-demand** — the rest of `docs/steering/`, `docs/decisions/`, and `docs/runbooks/`. Pulled in only when an index says the current task needs it.
 
 Each `index.md` does real work — it is **not** a bare table of contents. It carries a one-line summary per entry plus the path to the full file, so a session can often answer a question from the index alone and only open the full file when it needs detail. *Surface context at the level the moment requires.*
 
@@ -160,7 +162,6 @@ The single most important structural rule: **a file is a domain, not a category 
 ```
 docs/steering/
   index.md          → compact summaries + discovery paths (always loaded)
-  overview.md       → durable project summary (always loaded)
 
   # cross-cutting type files — only for genuinely project-wide knowledge
   # that has no single domain to live in:
@@ -180,7 +181,7 @@ docs/runbooks/      → sibling home for imperative procedures
   deploy.md
   rollback.md
 
-docs/adrs/          → architecture decision records
+docs/decisions/     → architecture decision records
   index.md          → compact summaries + discovery paths (always loaded)
   0001-....md
   0002-....md
@@ -213,19 +214,23 @@ docs/                         # repo-wide (shared substrate)
     conventions.md            # rules that apply across ALL packages
     commands.md               # workspace build/test/release (turbo/nx/pnpm) + env quirks
     monorepo.md               # split rationale, dependency-graph rules, versioning strategy
-  adrs/                       # decisions affecting multiple packages
-  runbooks/                   # repo-wide deploy/rollback
+  decisions/
+    index.md                  # decisions affecting multiple packages
+  runbooks/
+    index.md                  # repo-wide deploy/rollback
 
 packages/<pkg>/docs/          # per-package memory, co-located with its code
+  project.md                  # this package's contract, direction, and constraints
   steering/index.md + <domain>.md
-  adrs/                       # decisions scoped to just this package
+  decisions/index.md          # decisions scoped to just this package
+  runbooks/index.md           # package-scoped procedures, when any exist
 ```
 
-**Routing rule:** a fact that affects **one package** lives in that package's `docs/`; a fact that affects **multiple packages or the workspace itself** (shared tooling, the release flow, a cross-package contract, "all packages use X") lives in the root `docs/`. A cross-package contract is a deliberate decision → a root-level ADR, linked from both packages' indexes.
+**Routing rule:** resolve scope before type. A fact that affects **one package** lives in that package's memory root (`packages/<pkg>/docs/`); a fact that affects **multiple packages or the workspace itself** (shared tooling, the release flow, a cross-package contract, "all packages use X") lives in root `docs/`. Within either root, route project contract → `project.md`, deliberate decision → `decisions/`, declarative domain knowledge → `steering/`, and procedure → `runbooks/`. A cross-package contract is a root-level ADR linked from the affected package indexes.
 
-**Loading stays progressive:** always-load the root `project.md` + root `steering/index.md`; when a session works in `packages/foo`, it *also* loads `packages/foo/docs/steering/index.md`. Never load every package's index at once — only the root's plus the active package's. The root index lists where each package's memory lives, so discovery still flows from one entry point. Keep the rules-file pointer block in the root, and add a local pointer in a package's own `CLAUDE.md`/`AGENTS.md` if it has one.
+**Loading stays progressive:** always load root `docs/project.md` plus root `docs/steering/index.md`, `docs/decisions/index.md`, and `docs/runbooks/index.md`. When a session works in `packages/<pkg>`, it also loads `packages/<pkg>/docs/project.md`, `packages/<pkg>/docs/steering/index.md`, and any local `packages/<pkg>/docs/decisions/index.md` or `packages/<pkg>/docs/runbooks/index.md`. Never load every package's indexes at once — only the root's plus the active package's. The root steering index lists where each package's memory lives, so discovery still flows from one entry point. Keep the rules-file pointer block in the root, and add a local pointer in a package's own `CLAUDE.md`/`AGENTS.md` if it has one.
 
-**Start lighter, split when justified.** For a small monorepo, skip the per-package roots and treat **each package as a domain file** in the root — `steering/foo.md`, `steering/bar.md`. That's the existing "one domain per file, nest as it grows" rule with package = domain. Promote a package to its own co-located `packages/<pkg>/docs/` only when its single file grows into 2+ concepts — the same split trigger used everywhere else.
+**Start lighter, split when justified.** For a small monorepo, skip the per-package roots and treat **each package as a domain file** in the root — `steering/foo.md`, `steering/bar.md`. That's the existing "one domain per file, nest as it grows" rule with package = domain. Promote a package to its own co-located `packages/<pkg>/docs/` only when its single file grows into 2+ concepts — the same split trigger used everywhere else. When promoted, create its `project.md` and steering index; create decisions and runbooks indexes when those local collections are introduced.
 
 ## Pruning: Cut for Wrongness, Not Size
 
@@ -277,7 +282,7 @@ Before considering memory work complete:
 - [ ] The knowledge was routed to the right home; nothing duplicates `project.md`, an ADR, or a spec folder.
 - [ ] Every fact has exactly one canonical location; everything else links to it.
 - [ ] The change went through a reviewable diff (commit/PR), not a silent in-place edit.
-- [ ] The relevant directory index (`docs/steering/index.md`, `docs/adrs/index.md`, or `docs/runbooks/index.md`) is updated so a future session can find the new content without reading everything.
+- [ ] The corresponding root or package-local steering, decisions, or runbooks index is updated so a future session can find the new content without reading everything.
 - [ ] Each file covers one concern; tiny/overlapping files were merged, multi-topic files split.
 - [ ] Any pruning removed something *stale or wrong*, and preserved stable-but-rare facts.
 - [ ] Runbooks link to real scripts/CI rather than restating commands.

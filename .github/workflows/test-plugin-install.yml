@@ -20,6 +20,9 @@ jobs:
       - name: Validate all skills
         run: node scripts/validate-skills.js
 
+      - name: Validate memory artifact contract
+        run: node --test scripts/validate-memory-contract.test.js
+
   validate-commands:
     name: Validate command parity and description sync
     runs-on: ubuntu-latest

@@ -59,7 +59,7 @@ For comprehensive coverage, load skills by phase:
 Starting a project:  spec-driven-development → planning-and-task-breakdown
 During development:  incremental-implementation + test-driven-development
 Before merge:        code-review-and-quality + security-and-hardening
-Before deploy:       shipping-and-launch
+Before deploy:       shipping-and-launch (delegates GO-only closeout to memory-management)
 ```
 
 ### Context-Aware Loading
@@ -69,6 +69,7 @@ Don't load all skills at once — it wastes context. Load skills relevant to the
 - Working on UI? Load `frontend-ui-engineering`
 - Debugging? Load `debugging-and-error-recovery`
 - Setting up CI? Load `ci-cd-and-automation`
+- Saving, loading, or pruning durable project knowledge? Load `memory-management`
 
 ## Skill Anatomy
 
@@ -113,7 +114,7 @@ The `.claude/commands/` directory contains slash commands for Claude Code:
 | `/test` | test-driven-development |
 | `/review` | code-review-and-quality |
 | `/code-simplify` | code-simplification |
-| `/ship` | shipping-and-launch |
+| `/ship` | shipping-and-launch, which delegates GO-only closeout to memory-management |
 | `/webperf` | web-performance-auditor (specialist agent, web apps only) |
 
 > Not sure which command fits? The `using-lucas-harness` meta-skill also routes a whole ticket: it classifies an incoming ticket from its content (Epic/Feature/Task/Bug/Incident/Migration/Improvement/Spike/Chore) and dispatches the calibrated flow over the commands above (see its "Routing an Incoming Ticket" section). It activates by description rather than a slash command, so just describe the ticket and let it route.
@@ -131,27 +132,34 @@ The `references/` directory contains supplementary checklists:
 
 Load a reference when you need detailed patterns beyond what the skill covers.
 
-## Spec and task artifacts
+## Project memory and workflow artifacts
 
-Skills and commands write durable markdown artifacts in three tiers by lifespan. The core of the lifecycle is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the filesystem-safe feature slug derived from the current git branch name — this lets multiple features have specs in flight at once instead of contending for a single root file. The bookends are **global**:
+Skills and commands write markdown artifacts in three scopes. Durable project memory is global and indexed; the core workflow is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the filesystem-safe feature slug derived from the current git branch name; Define artifacts are global because they exist before a feature branch.
 
 | Tier | Source | Artifact |
 |------|--------|----------|
+| Project memory (global) | memory-management | `docs/project.md` |
+| Project memory (global) | memory-management | `docs/steering/index.md`, `docs/steering/<domain>.md` |
+| Project memory (global) | documentation-and-adrs + memory-management | `docs/decisions/index.md`, `docs/decisions/NNNN-*.md` |
+| Project memory (global) | producing operational skill + memory-management | `docs/runbooks/index.md`, `docs/runbooks/<procedure>.md` |
 | Define (global, pre-feature) | interview-me | `docs/intent/<topic>.md` |
 | Define (global, pre-feature) | idea-refine | `docs/ideas/<idea-name>.md` |
 | Per-feature | `/spec` | `docs/specs/<slug>/spec.md` |
 | Per-feature | `/plan` | `docs/specs/<slug>/plan.md` (single ledger — tasks and status together) |
+| Per-feature candidate knowledge | memory-management | `docs/specs/<slug>/memory-delta.md` |
 | Per-feature | `/review` | `docs/specs/<slug>/review.md` |
 | Per-feature | `/ship` | `docs/specs/<slug>/ship.md` |
-| Cross-cutting (global) | documentation-and-adrs | `docs/decisions/NNNN-*.md`, `CHANGELOG.md` |
+| Cross-cutting (global) | documentation-and-adrs | `CHANGELOG.md` |
 | Cross-cutting (global) | deprecation-and-migration | `docs/migrations/<name>.md` |
-| Cross-cutting (global) | observability-and-instrumentation | `docs/runbooks/<alert>.md` |
 
-The Define-phase artifacts come *before* a branch exists, and the cross-cutting ones *outlive* the feature that prompted them — so neither is feature-scoped. The full map and slug-resolution rule live in the `context-engineering` skill. Treat these as **living documents** while the work is in progress:
+The Define-phase artifacts come *before* a branch exists, while project memory and cross-cutting artifacts outlive the feature that prompted them. The full map and slug-resolution rule live in the `context-engineering` skill. Treat workflow artifacts as living documents while work is in progress:
+
+In a monorepo with package-local memory, the durable homes may instead be rooted at `packages/<pkg>/docs/`; resolve root-versus-package scope before choosing `project.md`, `steering/`, `decisions/`, or `runbooks/`. Per-feature workflow artifacts remain in the repository-level `docs/specs/<slug>/`.
 
 - Keep them in version control during development so the human and the agent have a shared source of truth.
 - Update them when scope or decisions change.
-- If your repo doesn’t want a feature’s artifacts long‑term, delete its `docs/specs/<slug>/` folder before merge or add it to `.gitignore` — the workflow doesn’t require them to be permanent.
+- Retain shipped `docs/specs/<slug>/` folders: durable memory may link to their review and ship records as provenance.
+- Treat `memory-delta.md` as candidate workflow state. On GO, `/ship` invokes `memory-management` to route verified items to canonical homes; on NO-GO, the delta remains unpromoted.
 
 ## Tips
 

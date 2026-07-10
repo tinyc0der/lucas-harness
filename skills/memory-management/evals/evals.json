@@ -4,23 +4,44 @@
     {
       "id": 0,
       "name": "over-saving",
-      "prompt": "I just spent two hours debugging a flaky test and want to capture what's worth remembering into memory. Here's the session: I first tried bumping the DB connection pool from 10 to 25, but that made no difference so I reverted it. Then I found the real cause: setupTests.ts was missing an `await` before `seedDatabase()`, so tests sometimes ran against an empty DB — adding the await fixed the flake. Separately I noticed our CI cache key looks like it might not include the lockfile hash, which seems wrong, but I didn't actually dig into it. Also for reference our staging environment is at https://staging.acme.internal. Save what's worth remembering to memory/.",
-      "expected_output": "Saves ONLY verified, durable knowledge: the flaky-test failure mode (missing await -> tests run against empty DB) with its why. Does NOT save the abandoned connection-pool experiment (reverted, no lasting value) or the un-investigated CI cache hunch (unverified -> would be silent learning). Staging URL is borderline; saving it as a fact is acceptable. The point is selectivity, not dumping the whole session.",
-      "files": ["none — session is described in the prompt"]
+      "prompt": "I just spent two hours debugging a flaky test and want to capture what's worth remembering in durable project memory under docs/. Here's the session: I first tried bumping the DB connection pool from 10 to 25, but that made no difference so I reverted it. Then I found the real cause: setupTests.ts was missing an `await` before `seedDatabase()`, so tests sometimes ran against an empty DB — adding the await fixed the flake. Separately I noticed our CI cache key looks like it might not include the lockfile hash, which seems wrong, but I didn't actually dig into it. Also for reference our staging environment is at https://staging.acme.internal. Route each verified fact to its canonical home; use docs/steering/ only when nothing more specific owns it. The provided files establish an otherwise empty durable-memory core.",
+      "expected_output": "Saves ONLY verified, durable knowledge: the flaky-test failure mode (missing await -> tests run against empty DB) with its why, routed to the relevant docs/steering/ domain file. Does NOT save the abandoned connection-pool experiment (reverted, no lasting value) or the un-investigated CI cache hunch (unverified -> silent learning). The staging URL is optional if it is durable and verified. The point is selective, canonical routing rather than dumping the whole session.",
+      "files": [
+        "fixtures/over-saving/docs/project.md",
+        "fixtures/over-saving/docs/steering/index.md",
+        "fixtures/over-saving/docs/decisions/index.md",
+        "fixtures/over-saving/docs/runbooks/index.md"
+      ]
     },
     {
       "id": 1,
       "name": "link-not-copy",
-      "prompt": "Please add to memory/ that we use trunk-based development and that we chose PostgreSQL as our datastore, so future sessions know these things. Our repo already has a project.md and an adrs/ folder (provided).",
-      "expected_output": "Recognizes that trunk-based development already lives in project.md and the Postgres choice already lives in adrs/0002. Does NOT duplicate either into a memory file. At most adds pointers/links (e.g. in memory/index.md) to the canonical sources. The skill's 'one canonical location, reference don't duplicate' rule should win over the literal 'add to memory' instruction.",
-      "files": ["input/project.md", "input/adrs/0002-datastore-postgres.md"]
+      "prompt": "Please make sure future sessions discover that we use trunk-based development and chose PostgreSQL as our datastore. The provided repo already has docs/project.md and docs/decisions/0002-datastore-postgres.md.",
+      "expected_output": "Recognizes that trunk-based development already lives in docs/project.md and the PostgreSQL choice already lives in docs/decisions/0002-datastore-postgres.md. Does NOT duplicate either into docs/steering/. Updates docs/decisions/index.md only if the existing ADR is not discoverable there. The one-canonical-location rule wins over creating a second copy.",
+      "files": [
+        "fixtures/link-not-copy/docs/project.md",
+        "fixtures/link-not-copy/docs/steering/index.md",
+        "fixtures/link-not-copy/docs/decisions/index.md",
+        "fixtures/link-not-copy/docs/decisions/0002-datastore-postgres.md",
+        "fixtures/link-not-copy/docs/runbooks/index.md"
+      ]
     },
     {
       "id": 2,
       "name": "prune-not-size",
-      "prompt": "My memory/ folder is getting big and I'm worried it's eating into my context window every session. Cut it down by about half to keep things lean. The current memory/ is provided.",
-      "expected_output": "Refuses to cut by size alone. Removes the genuinely stale content (build-tooling.md / Gulp — migrated to Vite and deleted). PRESERVES the rarely-used-but-valid facts, especially the no-Friday-deploy preference (rare but bit them hard, incident #318) and the detailed deploy runbook. Addresses the context worry via progressive disclosure (index + load-on-demand) rather than deletion. Pruning justified by wrongness, not size.",
-      "files": ["input/memory/ (index.md, conventions.md, build-tooling.md, preferences.md, runbooks/deploy.md)"]
+      "prompt": "My docs/steering/ folder is getting big and I'm worried it's eating into my context window every session. Cut it down by about half. The current docs/steering/, docs/runbooks/, and package.json are provided.",
+      "expected_output": "Refuses to cut by size alone. Removes or supersedes the genuinely stale Gulp command because package.json proves the project migrated to Vite. PRESERVES the rarely used but valid no-Friday-deploy preference (incident #318) and the detailed docs/runbooks/deploy.md procedure. Addresses context cost through the steering and runbooks indexes plus load-on-demand. Pruning is justified by wrongness, not size, and affected indexes are updated.",
+      "files": [
+        "fixtures/prune-not-size/package.json",
+        "fixtures/prune-not-size/docs/project.md",
+        "fixtures/prune-not-size/docs/decisions/index.md",
+        "fixtures/prune-not-size/docs/steering/index.md",
+        "fixtures/prune-not-size/docs/steering/conventions.md",
+        "fixtures/prune-not-size/docs/steering/commands.md",
+        "fixtures/prune-not-size/docs/steering/preferences.md",
+        "fixtures/prune-not-size/docs/runbooks/index.md",
+        "fixtures/prune-not-size/docs/runbooks/deploy.md"
+      ]
     }
   ]
 }

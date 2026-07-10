@@ -65,6 +65,8 @@ Produce a single output:
 
 Persist this decision to `docs/specs/<slug>/ship.md` so the go/no-go call and its rollback plan are auditable after the session. If no feature directory resolves (an ad-hoc ship check outside the workflow), report inline instead.
 
+After recording the decision, complete the `shipping-and-launch` skill's sequential **Memory Closeout After the Ship Decision**. Do not add memory closeout to the parallel persona fan-out.
+
 ## Rules
 
 1. The three Phase A personas run in parallel — never sequentially.

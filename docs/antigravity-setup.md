@@ -53,7 +53,7 @@ The plugin registers 8 custom slash commands: 7 lifecycle commands and the `/web
 | `/test` | Run TDD workflow — red, green, refactor | `test-driven-development` |
 | `/review` | Five-axis code review | `code-review-and-quality` |
 | `/code-simplify` | Reduce complexity without changing behavior | `code-simplification` |
-| `/ship` | Pre-launch checklist via parallel persona fan-out | `shipping-and-launch` |
+| `/ship` | Parallel launch review and decision with delegated GO-only memory closeout | `shipping-and-launch` (delegates to `memory-management`) |
 | `/webperf` | Audit browser-facing apps for Core Web Vitals and performance issues | `web-performance-auditor` |
 
 Each command automatically invokes the corresponding skill and guides the agent step-by-step.

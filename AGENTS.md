@@ -28,6 +28,7 @@ The agent should automatically map user intent to skills:
 - Refactoring / simplification → `code-simplification`
 - API or interface design → `api-and-interface-design`
 - UI work → `frontend-ui-engineering`
+- Durable project knowledge, preferences, lessons, or memory drift → `memory-management`
 
 ### Lifecycle Mapping (Implicit Commands)
 
@@ -40,7 +41,7 @@ Instead, the agent must internally follow this lifecycle:
 - BUILD → `incremental-implementation` + `test-driven-development`
 - VERIFY → `debugging-and-error-recovery`
 - REVIEW → `code-review-and-quality`
-- SHIP → `shipping-and-launch`
+- SHIP → `shipping-and-launch` (owns the decision and delegates GO-only closeout to `memory-management` when `docs/specs/<slug>/memory-delta.md` exists)
 
 ### Execution Model
 
@@ -75,7 +76,7 @@ This repo has three composable layers. They have different jobs and should not b
 
 Composition rule: **the user (or a slash command) is the orchestrator. Personas do not invoke other personas.** A persona may invoke skills.
 
-The only multi-persona orchestration pattern this repo endorses is **parallel fan-out with a merge step** — used by `/ship` to run `code-reviewer`, `security-auditor`, and `test-engineer` concurrently and synthesize their reports. Do not build a "router" persona that decides which other persona to call; that's the job of slash commands and intent mapping.
+The only multi-persona orchestration pattern this repo endorses is **parallel fan-out with a merge step** — used by `/ship` to run `code-reviewer`, `security-auditor`, and `test-engineer` concurrently and synthesize their reports. Memory closeout is a sequential main-agent step after a GO decision, never a fourth fan-out persona. Do not build a "router" persona that decides which other persona to call; that's the job of slash commands and intent mapping.
 
 See [docs/agents.md](docs/agents.md) for the decision matrix and [references/orchestration-patterns.md](references/orchestration-patterns.md) for the full pattern catalog.
 
