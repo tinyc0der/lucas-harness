@@ -228,88 +228,64 @@ The Orchestrator dispatches work but does not implement it. The Sentinel communi
 
 ## Minimal Project and Workflow State
 
-A simple harness can start with durable project memory, ADRs, and per-workflow state:
+A simple harness can start with durable project memory and retained per-feature workflow state:
 
 ```text
-projects/<project-id>/
+docs/
   project.md
 
-  memory/
+  steering/
     index.md
-    overview.md
-    architecture.md
-    conventions.md
-    commands.md
-    risks.md
-    glossary.md
-    features.md
-    lessons.md
-    preferences.md
-    memory.json
-    proposed-updates/
+    <domain>.md
 
-  adr/
-    README.md
+  decisions/
+    index.md
     0001-record-architecture-decisions.md
     0002-example-decision.md
 
-  workflows/<workflow-id>/
-    workflow.json
-    intent.md
+  runbooks/
+    index.md
+    <procedure>.md
+
+  intent/<topic>.md
+  ideas/<idea>.md
+
+  specs/<slug>/
     spec.md
     plan.md
-    decisions.md
-    questions.md
-    journal.md
     memory-delta.md
-    adr-delta.md
-    evidence/
-    reports/
+    review.md
+    ship.md
 ```
 
 Suggested responsibilities:
 
-- `project.md` stores the stable project contract, product direction, and project-level constraints.
-- `memory/index.md` tells sessions which memory files to read for common task types.
-- `memory/overview.md` stores the durable project summary.
-- `memory/architecture.md`, `memory/conventions.md`, `memory/commands.md`, and `memory/risks.md` store reusable project knowledge.
-- `memory/features.md` stores feature history, status, and links to evidence.
-- `memory/lessons.md` stores evidence-backed lessons from completed workflows.
-- `memory/preferences.md` stores durable user or team preferences approved for this project.
-- `memory/memory.json` stores machine-readable memory metadata, provenance, confidence, and expiry when useful.
-- `memory/proposed-updates/` stores reviewable memory changes before they become durable memory.
-- `adr/README.md` stores the ADR index and ADR rules.
-- `adr/*.md` stores individual Architecture Decision Records.
-- `workflow.json` stores machine-readable status, tasks, assignments, and phase.
-- `intent.md` and `spec.md` store the user contract.
-- `plan.md` stores the task graph and task ledger.
-- `decisions.md` stores local workflow decisions and scope changes.
-- `questions.md` stores open and resolved questions.
-- `journal.md` stores an append-only event trail.
-- `memory-delta.md` stores proposed additions, changes, or removals for project memory discovered during the workflow.
-- `adr-delta.md` stores proposed ADR additions or updates discovered during the workflow.
-- `evidence/` stores task proof.
-- `reports/` stores review, critic, and audit results.
+- `docs/project.md` stores the stable project contract, product direction, and project-level constraints.
+- `docs/steering/index.md` maps domain-organized conventions, risks, lessons, commands, and preferences; leaf files load on demand.
+- `docs/decisions/index.md` maps dated Architecture Decision Records and their current status.
+- `docs/runbooks/index.md` maps repeatable operational procedures.
+- `docs/specs/<slug>/memory-delta.md` stores candidate durable knowledge discovered during one feature. It is workflow state, not durable memory.
+- On a GO ship decision, verified delta items route to `docs/project.md`, `docs/decisions/`, `docs/steering/`, or `docs/runbooks/` in one reviewable change. On NO-GO, they remain unpromoted.
+- Shipped `docs/specs/<slug>/` folders stay in version control so durable entries can link to `review.md` and `ship.md` as provenance.
 
-The exact files can change. The principle should not: project memory, ADRs, and workflow state must be explicit, durable, and readable by future sessions.
+The exact leaf files can change. The principle should not: project memory, decisions, and workflow state must be explicit, indexed, reviewable, and readable by future sessions.
 
 ## Workflow Lifecycle
 
 A typical workflow should move through these phases:
 
 1. **Intake:** capture user intent, constraints, risks, and success criteria.
-2. **Memory load:** identify relevant project memory and ADRs.
+2. **Memory load:** read `docs/project.md` plus the steering, decisions, and runbooks indexes, then load relevant leaf files on demand.
 3. **Specification:** convert intent into a clear spec or task contract.
 4. **Planning:** decompose the work into dispatchable units.
 5. **Execution:** assign bounded tasks to sessions with explicit handoff packets.
 6. **Verification:** collect evidence that the result satisfies the intent.
 7. **Review:** apply appropriate review, criticism, and audit based on risk.
-8. **Synthesis:** integrate reports into a final answer or final change set.
-9. **Memory delta:** propose durable lessons, conventions, risks, or feature history updates.
-10. **ADR delta:** propose ADRs for durable architecture decisions.
-11. **Closeout:** record final status, evidence, unresolved risks, and next possible work.
+8. **Synthesis and ship decision:** integrate reports into a GO/NO-GO result with a rollback plan.
+9. **Memory closeout:** on GO, review the feature's single memory delta and route verified items to their canonical homes; on NO-GO, leave it unpromoted.
+10. **Closeout:** record final status, evidence, unresolved risks, and next possible work.
 
-These phases are sequential by default but iterative under failure: Verification, Review, and the memory/ADR deltas can each return work to an earlier phase, and the workflow only advances when each phase's evidence holds. Closeout is the exception — reaching it means the loop has terminated.
+These phases are sequential by default but iterative under failure: Verification, Review, and memory closeout can each return work to an earlier phase, and the workflow only advances when each phase's evidence holds. Closeout is the exception — reaching it means the loop has terminated.
 
 The closeout should make the next workflow easier to start.
 
@@ -321,11 +297,11 @@ The closeout should make the next workflow easier to start.
 
 - **Safe parallelism:** Parallel sessions need isolation and ownership through worktrees, branches, file ownership, task locks, or an explicit merge protocol. Parallel work is not complete until integrated and verified as a whole.
 
-- **Memory retrieval:** Sessions should receive only relevant memory, not the whole project history. The memory index should help the Orchestrator choose what to load.
+- **Memory retrieval:** Sessions always receive `docs/project.md` plus the three compact indexes, then only the leaf memory relevant to the task.
 
 - **Memory freshness:** Memory should include provenance, confidence, and review triggers when useful. Stale memory should be updated, superseded, or removed.
 
-- **ADR hygiene:** ADRs should be indexed, searchable, and linked to related workflows. Superseded ADRs should stay available, but future sessions should see their status clearly.
+- **ADR hygiene:** ADRs should be indexed in `docs/decisions/index.md`, searchable, and linked to related feature evidence. Superseded ADRs should stay available, but future sessions should see their status clearly.
 
 - **Conflict handling:** When project memory conflicts with an ADR, the accepted ADR should usually win until reviewed. When two ADRs conflict, the workflow should stop and escalate.
 

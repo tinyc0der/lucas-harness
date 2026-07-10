@@ -75,6 +75,28 @@ When shipping is part of the workflow, persist the go/no-go decision and its rol
 - [ ] ADRs written for any architectural decisions
 - [ ] Changelog updated
 - [ ] User-facing documentation updated (if applicable)
+- [ ] Feature memory delta located and ready for post-decision closeout (if present)
+
+## Memory Closeout After the Ship Decision
+
+Memory closeout is a **sequential main-agent step after** review findings have
+been merged and the GO/NO-GO decision has been made. It is not a fourth review
+persona and must not run in the parallel fan-out.
+
+- **GO — promote verified knowledge.** If the active feature has
+  `docs/specs/<slug>/memory-delta.md`, invoke `memory-management` once. Do not
+  reject any candidate silently: record whether each is accepted, unverified, or
+  feature-local. Resolve each candidate's root-versus-package scope before choosing its canonical home.
+  Route accepted items within that memory root to `project.md`, `decisions/`,
+  `steering/`, or `runbooks/`; update every affected index; and include the
+  accepted set in the feature's single reviewable change/PR. Record each
+  candidate's disposition and target link in `memory-delta.md` so a later
+  session cannot promote it twice.
+- **NO-GO — leave `memory-delta.md` unpromoted.** Record why the launch was
+  blocked and keep every candidate as workflow state. Promote nothing into the
+  durable-memory core until a later ship decision is GO.
+- **Ad-hoc ship check.** If no feature directory resolves, report the memory
+  closeout inline and do not invent a delta file or durable-memory edit.
 
 ## Feature Flag Strategy
 
@@ -300,6 +322,7 @@ Before deploying:
 - [ ] Rollback plan documented
 - [ ] Monitoring dashboards set up
 - [ ] Team notified of deployment
+- [ ] GO decision recorded and `memory-delta.md` dispositioned via `memory-management` when present
 
 After deploying:
 

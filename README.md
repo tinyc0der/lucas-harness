@@ -151,9 +151,9 @@ Skills are plain Markdown - they work with any agent that accepts system prompts
 
 ---
 
-## All 24 Skills
+## All 28 Skills
 
-The commands above are entry points. The pack includes 24 skills total — 23 lifecycle skills plus the `using-lucas-harness` meta-skill. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
+The commands above are entry points. The pack includes 28 skills total — 27 lifecycle/support skills plus the `using-lucas-harness` meta-skill. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
 
 ### Meta - Discover which skill applies
 
@@ -167,6 +167,7 @@ The commands above are entry points. The pack includes 24 skills total — 23 li
 |-------|-------------|----------|
 | [interview-me](skills/interview-me/SKILL.md) | One-question-at-a-time interview that extracts what the user actually wants instead of what they think they should want, until ~95% confidence | The ask is underspecified, or the user invokes "interview me" / "grill me" |
 | [idea-refine](skills/idea-refine/SKILL.md) | Structured divergent/convergent thinking to turn vague ideas into concrete proposals | You have a rough concept that needs exploration |
+| [idea-handoff](skills/idea-handoff/SKILL.md) | Package an implementation-ready idea for a fresh session and worktree | You want another session to own implementation end-to-end |
 | [spec-driven-development](skills/spec-driven-development/SKILL.md) | Write a PRD covering objectives, commands, structure, code style, testing, and boundaries before any code | Starting a new project, feature, or significant change |
 
 ### Plan - Break it down
@@ -186,6 +187,7 @@ The commands above are entry points. The pack includes 24 skills total — 23 li
 | [doubt-driven-development](skills/doubt-driven-development/SKILL.md) | Adversarial fresh-context review of every non-trivial decision in-flight - CLAIM → EXTRACT → DOUBT → RECONCILE → STOP, with optional user-authorized cross-model escalation | Stakes are high (production, security, irreversible), working in unfamiliar code, or a confident output is cheaper to verify now than to debug later |
 | [frontend-ui-engineering](skills/frontend-ui-engineering/SKILL.md) | Component architecture, design systems, state management, responsive design, WCAG 2.1 AA accessibility | Building or modifying user-facing interfaces |
 | [api-and-interface-design](skills/api-and-interface-design/SKILL.md) | Contract-first design, Hyrum's Law, One-Version Rule, error semantics, boundary validation | Designing APIs, module boundaries, or public interfaces |
+| [orchestration](skills/orchestration/SKILL.md) | Coordinate structured multi-agent work with task graphs, message flows, and decision gates | Supervising parallel agents or a coordinated task DAG |
 
 ### Verify - Prove it works
 
@@ -213,6 +215,8 @@ The commands above are entry points. The pack includes 24 skills total — 23 li
 | [documentation-and-adrs](skills/documentation-and-adrs/SKILL.md) | Architecture Decision Records, API docs, inline documentation standards - document the *why* | Making architectural decisions, changing APIs, or shipping features |
 | [observability-and-instrumentation](skills/observability-and-instrumentation/SKILL.md) | Structured logging, RED metrics, OpenTelemetry tracing, symptom-based alerting - instrument as you build | Adding telemetry, or shipping anything that runs in production |
 | [shipping-and-launch](skills/shipping-and-launch/SKILL.md) | Pre-launch checklists, feature flag lifecycle, staged rollouts, rollback procedures, monitoring setup | Preparing to deploy to production |
+| [memory-management](skills/memory-management/SKILL.md) | Route, review, promote, load, and prune durable project knowledge | A feature ships, a durable preference or lesson appears, or memory drifts |
+| [create-pull-request](skills/create-pull-request/SKILL.md) | Write a PR description that a fresh-context reviewer can assess cold, then open it with gh | Opening or handing off a pull request for asynchronous review |
 
 ---
 
@@ -281,9 +285,10 @@ Every skill follows a consistent anatomy:
 
 ```
 lucas-harness/
-├── skills/                            # 24 skills (23 lifecycle + 1 meta)
+├── skills/                            # 28 skills (27 lifecycle/support + 1 meta)
 │   ├── interview-me/                  #   Define
 │   ├── idea-refine/                   #   Define
+│   ├── idea-handoff/                  #   Define → handoff
 │   ├── spec-driven-development/       #   Define
 │   ├── planning-and-task-breakdown/   #   Plan
 │   ├── incremental-implementation/    #   Build
@@ -293,6 +298,7 @@ lucas-harness/
 │   ├── frontend-ui-engineering/       #   Build
 │   ├── test-driven-development/       #   Build
 │   ├── api-and-interface-design/      #   Build
+│   ├── orchestration/                 #   Build/support
 │   ├── browser-testing-with-devtools/ #   Verify
 │   ├── debugging-and-error-recovery/  #   Verify
 │   ├── code-review-and-quality/       #   Review
@@ -305,6 +311,8 @@ lucas-harness/
 │   ├── documentation-and-adrs/        #   Ship
 │   ├── observability-and-instrumentation/ # Ship
 │   ├── shipping-and-launch/           #   Ship
+│   ├── memory-management/             #   Ship/session lifecycle
+│   ├── create-pull-request/            #   Ship
 │   └── using-lucas-harness/            #   Meta: how to use this pack
 ├── agents/                            # 4 specialist personas
 ├── references/                        # 5 supplementary checklists

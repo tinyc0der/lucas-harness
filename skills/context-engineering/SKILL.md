@@ -89,24 +89,45 @@ Load the relevant spec section when starting a feature. Don't load the entire sp
 
 The skills and workflow commands read and write durable markdown artifacts. This is the single
 source of truth for where every one of them lives — skills and commands reference this map; they do
-**not** invent their own paths. Artifacts fall into three tiers by lifespan:
+**not** invent their own paths. Artifacts fall into three scopes by lifespan and ownership:
 
 ```
 docs/
+  project.md              ← memory-management       ┐ DURABLE PROJECT MEMORY — GLOBAL
+  steering/                                          │ conventions, risks, lessons
+    index.md              ← memory-management       │ (declarative, domain-organized)
+    <domain>.md           ← memory-management       │
+  decisions/                                         │ deliberate architecture choices
+    index.md              ← memory-management + documentation-and-adrs
+    NNNN-*.md             ← documentation-and-adrs  │
+  runbooks/                                          │ repeatable operational procedures
+    index.md              ← memory-management + producer skill
+    <procedure>.md        ← producing operational skill
+
   intent/<topic>.md      ← interview-me            ┐ Define phase — GLOBAL, pre-feature
   ideas/<idea>.md        ← idea-refine             ┘ (no branch exists yet)
 
   specs/<slug>/          ← one directory per feature; slug = filesystem-safe branch slug
     spec.md              ← /spec   (spec-driven-development)   ┐ PER-FEATURE — scoped so
     plan.md              ← /plan   (planning-and-task-breakdown)│ multiple features can be
-    review.md            ← /review (code-review-and-quality)   │ in flight at once
-    ship.md              ← /ship   (shipping-and-launch)       ┘
+    memory-delta.md      ← memory-management (candidate knowledge)│ in flight at once
+    review.md            ← /review (code-review-and-quality)   │
+    ship.md              ← /ship   (shipping-and-launch)       ┘ retained after ship
 
-  decisions/NNNN-*.md    ← documentation-and-adrs  ┐ Cross-cutting — GLOBAL, outlive any
-  migrations/<name>.md   ← deprecation-and-migration│ one feature (deprecation notices live
-  runbooks/<alert>.md    ← observability-and-instrumentation   │ with their migration guide)
-CHANGELOG.md             ← documentation-and-adrs  ┘ (repo root, conventional location)
+  migrations/<name>.md   ← deprecation-and-migration  # Cross-cutting — GLOBAL
+CHANGELOG.md             ← documentation-and-adrs     # repo root, conventional location
 ```
+
+The always-loaded durable-memory entrypoints are `docs/project.md`,
+`docs/steering/index.md`, `docs/decisions/index.md`, and
+`docs/runbooks/index.md`; Architecture Decision Records use
+`docs/decisions/NNNN-*.md`. During a feature, proposed durable knowledge goes to
+`docs/specs/<slug>/memory-delta.md`; `/ship` invokes `memory-management` to route
+verified items to the appropriate durable home.
+
+For monorepos with package-local memory, mirror the durable homes under
+`packages/<pkg>/docs/`; resolve root-versus-package scope before artifact type.
+Per-feature workflow state remains in the repository-level `docs/specs/<slug>/`.
 
 **Feature-slug resolution (branch-name mapping)** — for the per-feature tier only:
 - The slug is a **filesystem-safe single path segment** derived from the current git branch name.
@@ -124,11 +145,12 @@ CHANGELOG.md             ← documentation-and-adrs  ┘ (repo root, conventiona
 - **To resolve the active feature when reading:** use the directory matching the current branch;
   if none exists and there is exactly one feature directory, use it; otherwise ask the user.
 
-**Why three tiers.** Intent and ideas come *before* a feature branch exists, so they can't be
-feature-scoped — they're global. ADRs, migration guides, runbooks, and the changelog *outlive* the
-feature that prompted them (an architectural decision or an on-call runbook is consulted long after
-the branch merges), so they're global too. Only the spec→ship lifecycle is per-feature, because
-that's the work that's genuinely concurrent across branches.
+**Why three scopes.** Intent and ideas come *before* a feature branch exists, so they can't be
+feature-scoped — they're global workflow artifacts. Project memory, ADRs, migration guides,
+runbooks, and the changelog outlive the feature that prompted them, so they're global and durable.
+Only the spec→ship lifecycle is per-feature, because that's the work that's genuinely concurrent
+across branches. Shipped feature folders remain in version control because durable memory may link
+to their review evidence; `memory-delta.md` is candidate state until `/ship` promotes or rejects it.
 
 **Provenance, not relocation.** The Define-phase artifacts are deliberately *not* copied into the
 feature directory, because one intent/idea can fan out into several specs and some are rejected

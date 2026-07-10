@@ -41,6 +41,7 @@ Task arrives
     ├── CI/CD pipeline work? ──────────→ ci-cd-and-automation
     ├── Deprecating/migrating? ────────→ deprecation-and-migration
     ├── Writing docs/ADRs? ───────────→ documentation-and-adrs
+    ├── Saving/syncing durable knowledge? → memory-management
     ├── Adding logs/metrics/alerts? ───→ observability-and-instrumentation
     └── Deploying/launching? ─────────→ shipping-and-launch
 ```
@@ -84,7 +85,8 @@ All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the fi
 
 - Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Improvement (refactor) → `improve/<x>` · Improvement (perf) → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
 - Epic → no single branch; each child feature gets its own `feature/<x>` (see below).
-- Migration guides live at `docs/migrations/<name>.md` and incident runbooks at `docs/runbooks/<alert>.md` — both **global** tiers in the artifact map, not under `docs/specs/<slug>/`.
+- Migration guides live at global `docs/migrations/<name>.md`. Incident runbooks live at `<memory-root>/runbooks/<alert>.md` after resolving root-versus-package scope through `memory-management`. Neither belongs under `docs/specs/<slug>/`.
+- Candidate durable knowledge discovered during feature work lives in `docs/specs/<slug>/memory-delta.md` until the feature reaches `/ship`.
 
 ### Step 3 — Dispatch the calibrated flow
 
@@ -92,11 +94,13 @@ Throughout, **"verify"** means: run the app and observe the changed runtime beha
 
 In Claude Code, dispatch the slash commands below. In harnesses without slash commands, invoke the equivalent lifecycle skill(s) named by that command instead: `/spec` → `lucas-harness:spec-driven-development`, `/build` → `lucas-harness:incremental-implementation` + `lucas-harness:test-driven-development`, `/test` → `lucas-harness:test-driven-development`, `/review` → `lucas-harness:code-review-and-quality`, `/code-simplify` → `lucas-harness:code-simplification`, and `/ship` → `lucas-harness:shipping-and-launch`.
 
+Every `/ship` performs memory closeout **sequentially after** the merged GO/NO-GO decision. On GO, `shipping-and-launch` invokes `memory-management` against `docs/specs/<slug>/memory-delta.md`, routes verified items to their canonical homes, and records each disposition. On NO-GO, the delta remains unpromoted workflow state. Memory closeout is never part of `/ship`'s parallel review fan-out.
+
 - **Epic** — `lucas-harness:interview-me` → write intent to `docs/intent/<topic>.md` (reuse the intent doc if Step 0 already produced one — don't re-interview) → 🔴 **approve the split** into features → run the **Feature** flow below for each child feature on its own branch → finish with an integration **verify** across the assembled features. *Skips:* one mega spec/plan/ship.
 - **Feature** — `/spec` (🔴 confirm spec) → `/build auto` (🔴 approve plan — the gate lives inside `build auto`) → **verify** if the ticket has runtime surface → `/ship` (🔴 GO/NO-GO). *Skips:* `/plan` and `/test` — both run inside `/build auto`.
 - **Task** — confirm the active parent feature has `docs/specs/<slug>/plan.md` with a pending task → `/build` (single task) → **verify** if it has runtime surface. The child rides the parent feature's `/ship`. If no parent spec/plan exists, reclassify the work as a Feature, Bug, or Chore before proceeding. *Skips:* spec, plan, `/test`, standalone ship. No human gate unless an escalation trigger fires.
 - **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → `/ship` (🔴 if the root cause was risky). *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop. (If it's live in production, route to **Incident** instead.)
-- **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: write or update a runbook at `docs/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
+- **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: resolve memory scope, then write or update `<memory-root>/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
 - **Migration · deprecation** — write the migration/deprecation guide to `docs/migrations/<name>.md` via `lucas-harness:deprecation-and-migration` (the guide *is* the spec) → roll out in phases (deprecate → warn → remove) → 🔴 **destructive/irreversible-step gate** before any data migration, public-API removal, or dropped column (anything not `git revert`-able) → **verify** each phase → `/review` → `/ship` with the guide + a `CHANGELOG.md` entry and the deprecation timeline communicated. *Skips:* `/spec`, `/plan` for the mechanics.
 - **Improvement · refactor** — ensure tests guard the current behavior first (add via `/test` if missing) → `/code-simplify` (it runs the test loop internally) → `/review` → ship-lite. *Skips:* spec, plan, a separate `/test` pass, and **verify** — unless the change turns out to alter behavior, in which case verify.
 - **Improvement · perf** — capture a baseline measurement → `lucas-harness:performance-optimization` (or `/webperf` for web surfaces) → **verify the measured improvement** (re-measure, don't assume) → `/review` → `/ship`. 🔴 if it touches a hot or risky path. *Skips:* spec, plan.
@@ -255,7 +259,8 @@ For a complete feature, the typical skill sequence is:
 13. git-workflow-and-versioning → Clean commit history
 14. documentation-and-adrs      → Document decisions
 15. deprecation-and-migration   → Retire old systems and move users safely when needed
-16. shipping-and-launch         → Deploy safely
+16. shipping-and-launch         → Decide and deploy safely
+17. memory-management           → Promote verified knowledge during GO-only ship closeout
 ```
 
 Not every task needs every skill. A bug fix might only need: `debugging-and-error-recovery` → `test-driven-development` → `code-review-and-quality`.
@@ -287,3 +292,4 @@ Not every task needs every skill. A bug fix might only need: `debugging-and-erro
 | Ship | documentation-and-adrs | Document the why, not just the what |
 | Ship | observability-and-instrumentation | Structured logs, RED metrics, traces, symptom-based alerts |
 | Ship | shipping-and-launch | Pre-launch checklist, monitoring, rollback plan |
+| Ship | memory-management | Route, review, promote, and prune durable project knowledge |
