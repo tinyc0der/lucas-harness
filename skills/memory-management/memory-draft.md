@@ -1,6 +1,9 @@
 # Memory Management Skill — Draft
 
 > Sources:
+> - Open Knowledge Format v0.1 draft — portable Markdown bundles, typed YAML
+>   frontmatter, reserved indexes/logs, links, and permissive consumption
+>   (https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
 > - principles.md (Core Model, "Give each project its own memory", Memory freshness)
 > - Letta `initializing-memory` skill + memory subagent — progressive disclosure,
 >   always-loaded core vs. load-on-demand, retention over compression, File
@@ -19,23 +22,25 @@
 ## Problem Statement
 
 How might we help an agent (in any vibe-coding tool, not just Claude Code) keep a
-project's `docs/steering/` directory durable, relevant, and trustworthy — so future
+project's `docs/knowledge/` OKF bundle durable, relevant, and trustworthy — so future
 sessions start from real knowledge instead of re-deriving it, without polluting
 memory with unverified one-off assumptions?
 
 ## Recommended Direction
 
 A tool-agnostic skill that owns one job: **route durable knowledge to the right
-home and keep `docs/steering/` to only what the other artifacts don't already cover.**
+home and keep `docs/knowledge/steering/` to only what the other artifacts don't already cover.**
 
 The project separates durable knowledge into clear homes:
 
 ```
-docs/project.md          → stable (but evolving) project contract, direction, constraints
-docs/decisions/          → architecture decision records
-docs/specs/<slug>/       → per-feature workflow lifecycle: spec → plan → memory delta → review → ship
-docs/steering/           → durable cross-workflow knowledge that fits nowhere above (declarative)
-docs/runbooks/           → repeatable operational procedures (imperative)
+docs/knowledge/          → dedicated OKF v0.1 bundle boundary
+  index.md               → bundle map + version declaration
+  project.md             → stable (but evolving) project contract, direction, constraints
+  decisions/             → architecture decision records
+  steering/              → durable cross-workflow knowledge that fits nowhere above (declarative)
+  runbooks/              → repeatable operational procedures (imperative)
+docs/specs/<slug>/       → per-feature workflow lifecycle outside the bundle
 ```
 
 `docs/specs/<slug>/` IS the workflow folder — organized by feature rather than an
@@ -50,9 +55,9 @@ docs/specs/<slug>/
   ship.md          → launch / deployment record
 ```
 
-`docs/steering/` is the residue. The skill's first move is always to ask "does
-this belong in `docs/project.md`, `docs/decisions/`, this feature's spec folder,
-or `docs/runbooks/` instead?" — and only route it to `docs/steering/` when the
+`docs/knowledge/steering/` is the residue. The skill's first move is always to ask "does
+this belong in `docs/knowledge/project.md`, `docs/knowledge/decisions/`, this feature's spec folder,
+or `docs/knowledge/runbooks/` instead?" — and only route it to `docs/knowledge/steering/` when the
 answer is no.
 
 The skill rests on two ideas from principles.md:
@@ -68,20 +73,40 @@ The skill rests on two ideas from principles.md:
 2. **The memory-delta → PR pattern** — Discovered knowledge lands in the feature's
    `docs/specs/<slug>/memory-delta.md` during the work. At closeout each verified
    item is promoted only after a GO decision. Resolve repository-versus-package
-   scope first, then route by type to that memory root's `project.md`,
-   `decisions/`, `steering/`, or `runbooks/` through a git branch + PR. Record a
+   scope first, then route by type to that memory root's `knowledge/project.md`,
+   `knowledge/decisions/`, `knowledge/steering/`, or `knowledge/runbooks/` through a git branch + PR. Record a
    disposition for every candidate rather than silently dropping it. A NO-GO
    leaves the delta unpromoted. The PR *is* the review and provenance trail — git
    already gives diff, history, and approval, so no hand-rolled
    `proposed-updates/` queue is needed. Nothing becomes durable memory without
    passing through a reviewable change.
 
+## OKF v0.1 Profile
+
+The dedicated `docs/knowledge/` boundary is essential: OKF conformance applies
+recursively to a bundle, while `docs/` also contains specs, migration guides, and
+general documentation produced by other workflows. Every repository or package
+bundle has its own `index.md` with `okf_version: "0.1"`.
+
+Every non-reserved concept is UTF-8 Markdown with parseable YAML frontmatter and
+a non-empty `type`; producers also add `title` and `description`. Use `Project`,
+`Project Guidance`, `Architecture Decision`, and `Playbook` as defaults. Reserve
+`index.md` and `log.md`; collection indexes have no frontmatter, while `log.md`
+is optional because git already records history.
+
+Internal concept links prefer absolute bundle-relative paths. Workflow evidence
+and package-bundle references are cross-boundary sources, so use durable
+repository/web citations when standalone portability matters. Consumers preserve
+unknown fields and tolerate unknown types, missing optional metadata, broken
+links, and missing optional indexes. Lucas requires indexes from its producers
+for discovery, but does not reject otherwise readable OKF content.
+
 ## What steering/ Should Capture (and not)
 
 | Goes elsewhere | Belongs in steering/ |
 |---|---|
-| Product direction → `docs/project.md` | Conventions the code follows but no doc states |
-| Architecture decisions → `docs/decisions/` | Build / test / verify commands and env quirks |
+| Product direction → `docs/knowledge/project.md` | Conventions the code follows but no doc states |
+| Architecture decisions → `docs/knowledge/decisions/` | Build / test / verify commands and env quirks |
 | Feature requirements → `docs/specs/<slug>/` | Known risks and fragile areas found while working |
 | Per-feature lifecycle → `docs/specs/<slug>/` | Recurring failure modes |
 | | Lessons from completed features (tried X, failed because Y) |
@@ -115,11 +140,12 @@ enumeration of what's already visible in the code, it doesn't belong in memory.
 
 Split memory into two tiers (adapted from Letta's `initializing-memory`):
 
-- **Always-loaded core** — `docs/project.md` plus `docs/steering/index.md`,
-  `docs/decisions/index.md`, and `docs/runbooks/index.md`. Small, durable, read at
-  the start of every session: the project's identity plus maps of everything else.
-- **Load-on-demand** — the rest of `docs/steering/`, `docs/decisions/`, and
-  `docs/runbooks/`. Pulled in only when an index says the current task needs it.
+- **Always-loaded core** — `docs/knowledge/index.md` plus
+  `docs/knowledge/project.md`. Small, durable, and read at the start of every
+  session: the bundle map plus project identity.
+- **Load-on-demand** — the relevant `docs/knowledge/steering/`,
+  `docs/knowledge/decisions/`, or `docs/knowledge/runbooks/` index, followed by
+  only the concepts the current task needs.
 
 This split is what makes progressive disclosure work: the core is cheap enough to
 always load, and it carries enough signal to decide what *not* to load.
@@ -135,8 +161,8 @@ one-domain-per-file and conditional loading. There is **no** catch-all `risks.md
 or `lessons.md`.
 
 ```
-docs/steering/       → declarative durable knowledge
-  index.md          → compact summaries + discovery paths (always loaded)
+docs/knowledge/steering/       → declarative durable knowledge
+  index.md          → compact summaries + discovery paths (load on demand)
 
   # cross-cutting type files — only for genuinely project-wide knowledge:
   conventions.md    → global rules (naming, no default exports, imports)
@@ -150,7 +176,7 @@ docs/steering/       → declarative durable knowledge
   api.md
   testing.md
 
-docs/runbooks/       → sibling top-level home for imperative procedures
+docs/knowledge/runbooks/       → sibling home for imperative procedures
   index.md
   deploy.md
   rollback.md
@@ -166,7 +192,7 @@ subfolder.** Most of memory is declarative (facts, conventions, lessons) and liv
 in `steering/`; a runbook is an ordered, executable procedure for a recurring
 operation. It's durable and cross-workflow, owned by no spec or ADR, but distinct
 in *shape* from declarative knowledge — so it sits in a sibling `runbooks/`
-directory alongside `docs/steering/` and `docs/decisions/`. Two rules keep them honest:
+directory alongside `docs/knowledge/steering/` and `docs/knowledge/decisions/`. Two rules keep them honest:
 
 - **Link, don't restate** — a runbook references the actual scripts, CI config,
   and `commands.md` rather than copying command text that will drift. One
@@ -181,11 +207,11 @@ each is a *domain*, not a knowledge-type: `api-standards.md`, `testing.md`,
 `deployment.md`. Each opens with a `## Philosophy` line (the why) before patterns.
 
 Note: Kiro's foundational trio (`product.md`/`tech.md`/`structure.md`) is **not**
-adopted — it overlaps `docs/project.md` and `docs/decisions/`, which already own product
+adopted — it overlaps `docs/knowledge/project.md` and `docs/knowledge/decisions/`, which already own product
 direction, stack, and architecture decisions in our layout.
 
 (In this project, `product.md`/`tech.md`/`structure.md` overlap with `project.md`
-and `docs/decisions/` — prefer those homes and reserve `docs/steering/` for the
+and `docs/knowledge/decisions/` — prefer those homes and reserve `docs/knowledge/steering/` for the
 domain files that have no other home.)
 
 **One domain per file.** Three sources agree (Kiro "focus", Letta "do not
@@ -245,17 +271,23 @@ PR, so git holds the staging, diff, and provenance. The exact files can flex per
 project; the principle does not — memory must be explicit, indexed, and readable
 by a future session.
 
-## Two Modes: Bootstrap and Sync (cc-sdd)
+## Three Modes: Bootstrap, Migrate, and Sync
 
-The skill has two operational modes, detected by the state of the durable core:
+The skill detects the state of the scoped OKF bundle:
 
-- **Bootstrap** (`docs/project.md` or any of `docs/steering/index.md`,
-  `docs/decisions/index.md`, and `docs/runbooks/index.md` is missing) — generate
+- **Bootstrap** (`<bundle-root>/index.md`, `<bundle-root>/project.md`, or a
+  required collection index is missing and no legacy core exists) — generate
   or repair the core by *analyzing the codebase*: README, configs, dependency
   manifests, and directory structure. Extract the patterns (per the Golden
   Rule), don't interrogate the user for what the code already shows. Research
   areas (product, tech, structure, domain patterns) are independent and can run
   in parallel.
+- **Migrate** (any subset of the scoped legacy `project.md`, `steering/`,
+  `decisions/`, or `runbooks/` homes exists) — stop if `knowledge/` also exists;
+  otherwise inventory and move every existing artifact, repair missing profile
+  files from evidence, resolve reserved-name collisions, add OKF frontmatter,
+  preserve unique rules-file knowledge and tool controls, and rewrite links in
+  one reviewable change.
 - **Sync** (the durable core exists) — reconcile memory against the current code
   and propose updates. This is the ongoing maintenance loop and where most
   triggers below fire.
@@ -268,7 +300,8 @@ The skill has two operational modes, detected by the state of the durable core:
 
 **Updates are additive; user-written content is sacred.** A sync proposes
 *additions* and *supersessions* through review — it never silently overwrites a
-human-authored entry. When in doubt, add rather than replace.
+human-authored entry. Preserve unknown OKF types and frontmatter fields. When in
+doubt, add rather than replace.
 
 ## Triggers (when the skill runs)
 
@@ -283,8 +316,8 @@ not a separate process.
   folder is kept permanently.
 - The user corrects behavior or states a preference → capture it as evidence-backed.
 - A failure is verified and reproducible → record the failure mode.
-- A session starts and feels familiar → load the four-file core, then only the
-  *relevant* memory via its indexes.
+- A session starts and feels familiar → load the root index plus project concept,
+  then only the *relevant* collection index and concepts.
 - Memory looks stale or contradicts the live codebase → **prune**: update,
   supersede, or remove (same skill, same branch + PR flow).
 

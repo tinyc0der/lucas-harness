@@ -4,43 +4,56 @@
     {
       "id": 0,
       "name": "over-saving",
-      "prompt": "I just spent two hours debugging a flaky test and want to capture what's worth remembering in durable project memory under docs/. Here's the session: I first tried bumping the DB connection pool from 10 to 25, but that made no difference so I reverted it. Then I found the real cause: setupTests.ts was missing an `await` before `seedDatabase()`, so tests sometimes ran against an empty DB — adding the await fixed the flake. Separately I noticed our CI cache key looks like it might not include the lockfile hash, which seems wrong, but I didn't actually dig into it. Also for reference our staging environment is at https://staging.acme.internal. Route each verified fact to its canonical home; use docs/steering/ only when nothing more specific owns it. The provided files establish an otherwise empty durable-memory core.",
-      "expected_output": "Saves ONLY verified, durable knowledge: the flaky-test failure mode (missing await -> tests run against empty DB) with its why, routed to the relevant docs/steering/ domain file. Does NOT save the abandoned connection-pool experiment (reverted, no lasting value) or the un-investigated CI cache hunch (unverified -> silent learning). The staging URL is optional if it is durable and verified. The point is selective, canonical routing rather than dumping the whole session.",
+      "prompt": "I just spent two hours debugging a flaky test and want to capture what's worth remembering in the OKF durable-memory bundle under docs/knowledge/. Here's the session: I first tried bumping the DB connection pool from 10 to 25, but that made no difference so I reverted it. Then I found the real cause: setupTests.ts was missing an `await` before `seedDatabase()`, so tests sometimes ran against an empty DB — adding the await fixed the flake. Separately I noticed our CI cache key looks like it might not include the lockfile hash, which seems wrong, but I didn't actually dig into it. Also for reference our staging environment is at https://staging.acme.internal. Route each verified fact to its canonical concept; use docs/knowledge/steering/ only when nothing more specific owns it. The provided files establish an otherwise empty bundle.",
+      "expected_output": "Saves ONLY verified, durable knowledge: the flaky-test failure mode (missing await -> tests run against empty DB) with its why, routed to a typed Project Guidance concept in the relevant docs/knowledge/steering/ domain. Updates the steering index with the concept description. Does NOT save the abandoned connection-pool experiment (reverted, no lasting value) or the un-investigated CI cache hunch (unverified -> silent learning). The staging URL is optional if it is durable and verified. The point is selective, canonical routing rather than dumping the whole session.",
       "files": [
-        "fixtures/over-saving/docs/project.md",
-        "fixtures/over-saving/docs/steering/index.md",
-        "fixtures/over-saving/docs/decisions/index.md",
-        "fixtures/over-saving/docs/runbooks/index.md"
+        "fixtures/over-saving/docs/knowledge/index.md",
+        "fixtures/over-saving/docs/knowledge/project.md",
+        "fixtures/over-saving/docs/knowledge/steering/index.md",
+        "fixtures/over-saving/docs/knowledge/decisions/index.md",
+        "fixtures/over-saving/docs/knowledge/runbooks/index.md"
       ]
     },
     {
       "id": 1,
       "name": "link-not-copy",
-      "prompt": "Please make sure future sessions discover that we use trunk-based development and chose PostgreSQL as our datastore. The provided repo already has docs/project.md and docs/decisions/0002-datastore-postgres.md.",
-      "expected_output": "Recognizes that trunk-based development already lives in docs/project.md and the PostgreSQL choice already lives in docs/decisions/0002-datastore-postgres.md. Does NOT duplicate either into docs/steering/. Updates docs/decisions/index.md only if the existing ADR is not discoverable there. The one-canonical-location rule wins over creating a second copy.",
+      "prompt": "Please make sure future sessions discover that we use trunk-based development and chose PostgreSQL as our datastore. The provided OKF bundle already has docs/knowledge/project.md and docs/knowledge/decisions/0002-datastore-postgres.md.",
+      "expected_output": "Recognizes that trunk-based development already lives in docs/knowledge/project.md and the PostgreSQL choice already lives in the typed, indexed docs/knowledge/decisions/0002-datastore-postgres.md concept. Does NOT duplicate either into docs/knowledge/steering/ and makes no content change. The one-canonical-location rule wins over creating a second copy.",
       "files": [
-        "fixtures/link-not-copy/docs/project.md",
-        "fixtures/link-not-copy/docs/steering/index.md",
-        "fixtures/link-not-copy/docs/decisions/index.md",
-        "fixtures/link-not-copy/docs/decisions/0002-datastore-postgres.md",
-        "fixtures/link-not-copy/docs/runbooks/index.md"
+        "fixtures/link-not-copy/docs/knowledge/index.md",
+        "fixtures/link-not-copy/docs/knowledge/project.md",
+        "fixtures/link-not-copy/docs/knowledge/steering/index.md",
+        "fixtures/link-not-copy/docs/knowledge/decisions/index.md",
+        "fixtures/link-not-copy/docs/knowledge/decisions/0002-datastore-postgres.md",
+        "fixtures/link-not-copy/docs/knowledge/runbooks/index.md"
       ]
     },
     {
       "id": 2,
       "name": "prune-not-size",
-      "prompt": "My docs/steering/ folder is getting big and I'm worried it's eating into my context window every session. Cut it down by about half. The current docs/steering/, docs/runbooks/, and package.json are provided.",
-      "expected_output": "Refuses to cut by size alone. Removes or supersedes the genuinely stale Gulp command because package.json proves the project migrated to Vite. PRESERVES the rarely used but valid no-Friday-deploy preference (incident #318) and the detailed docs/runbooks/deploy.md procedure. Addresses context cost through the steering and runbooks indexes plus load-on-demand. Pruning is justified by wrongness, not size, and affected indexes are updated.",
+      "prompt": "My docs/knowledge/steering/ collection is getting big and I'm worried it's eating into my context window every session. Cut it down by about half. The current OKF bundle and package.json are provided.",
+      "expected_output": "Refuses to cut by size alone. Removes or supersedes the genuinely stale Gulp command because package.json proves the project migrated to Vite. PRESERVES the rarely used but valid no-Friday-deploy preference (incident #318) and the detailed docs/knowledge/runbooks/deploy.md Playbook. Addresses context cost by always loading only the bundle root index and project concept, then loading collection indexes and concepts on demand. Pruning is justified by wrongness, not size, and affected indexes are updated without stripping unknown frontmatter.",
       "files": [
         "fixtures/prune-not-size/package.json",
-        "fixtures/prune-not-size/docs/project.md",
-        "fixtures/prune-not-size/docs/decisions/index.md",
-        "fixtures/prune-not-size/docs/steering/index.md",
-        "fixtures/prune-not-size/docs/steering/conventions.md",
-        "fixtures/prune-not-size/docs/steering/commands.md",
-        "fixtures/prune-not-size/docs/steering/preferences.md",
-        "fixtures/prune-not-size/docs/runbooks/index.md",
-        "fixtures/prune-not-size/docs/runbooks/deploy.md"
+        "fixtures/prune-not-size/docs/knowledge/index.md",
+        "fixtures/prune-not-size/docs/knowledge/project.md",
+        "fixtures/prune-not-size/docs/knowledge/decisions/index.md",
+        "fixtures/prune-not-size/docs/knowledge/steering/index.md",
+        "fixtures/prune-not-size/docs/knowledge/steering/conventions.md",
+        "fixtures/prune-not-size/docs/knowledge/steering/commands.md",
+        "fixtures/prune-not-size/docs/knowledge/steering/preferences.md",
+        "fixtures/prune-not-size/docs/knowledge/runbooks/index.md",
+        "fixtures/prune-not-size/docs/knowledge/runbooks/deploy.md"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "unknown-version",
+      "prompt": "Read this imported knowledge bundle. Its root declares OKF 9.9, which you do not recognize. The project concept uses an unknown type and vendor extension, omits optional title and description fields, has a broken concept link, and has no collection indexes. Tell me what the project says without normalizing or rewriting the bundle.",
+      "expected_output": "Warns that OKF 9.9 is unrecognized, then attempts best-effort consumption instead of refusing the bundle. Reads the project concept as generic knowledge, tolerates the missing optional metadata, missing indexes, and broken link, and preserves the unknown type and vendor_extension field. Does not claim v0.1 conformance and does not rewrite the imported files.",
+      "files": [
+        "fixtures/unknown-version/docs/knowledge/index.md",
+        "fixtures/unknown-version/docs/knowledge/project.md"
       ]
     }
   ]

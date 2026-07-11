@@ -232,20 +232,22 @@ A simple harness can start with durable project memory and retained per-feature 
 
 ```text
 docs/
-  project.md
+  knowledge/              # Open Knowledge Format v0.1 bundle
+    index.md               # bundle map + okf_version declaration
+    project.md
 
-  steering/
-    index.md
-    <domain>.md
+    steering/
+      index.md
+      <domain>.md
 
-  decisions/
-    index.md
-    0001-record-architecture-decisions.md
-    0002-example-decision.md
+    decisions/
+      index.md
+      0001-record-architecture-decisions.md
+      0002-example-decision.md
 
-  runbooks/
-    index.md
-    <procedure>.md
+    runbooks/
+      index.md
+      <procedure>.md
 
   intent/<topic>.md
   ideas/<idea>.md
@@ -260,22 +262,24 @@ docs/
 
 Suggested responsibilities:
 
-- `docs/project.md` stores the stable project contract, product direction, and project-level constraints.
-- `docs/steering/index.md` maps domain-organized conventions, risks, lessons, commands, and preferences; leaf files load on demand.
-- `docs/decisions/index.md` maps dated Architecture Decision Records and their current status.
-- `docs/runbooks/index.md` maps repeatable operational procedures.
+- `docs/knowledge/index.md` declares OKF v0.1 and maps the bundle for progressive disclosure.
+- `docs/knowledge/project.md` stores the stable project contract, product direction, and project-level constraints.
+- `docs/knowledge/steering/index.md` maps domain-organized conventions, risks, lessons, commands, and preferences; leaf files load on demand.
+- `docs/knowledge/decisions/index.md` maps dated Architecture Decision Records and their current status.
+- `docs/knowledge/runbooks/index.md` maps repeatable operational procedures.
 - `docs/specs/<slug>/memory-delta.md` stores candidate durable knowledge discovered during one feature. It is workflow state, not durable memory.
-- On a GO ship decision, verified delta items route to `docs/project.md`, `docs/decisions/`, `docs/steering/`, or `docs/runbooks/` in one reviewable change. On NO-GO, they remain unpromoted.
-- Shipped `docs/specs/<slug>/` folders stay in version control so durable entries can link to `review.md` and `ship.md` as provenance.
+- Every non-reserved bundle concept carries parseable YAML frontmatter with a non-empty `type`; `index.md` and `log.md` retain their reserved OKF meanings.
+- On a GO ship decision, verified delta items route to `docs/knowledge/project.md`, `docs/knowledge/decisions/`, `docs/knowledge/steering/`, or `docs/knowledge/runbooks/` in one reviewable change. On NO-GO, they remain unpromoted.
+- Shipped `docs/specs/<slug>/` folders stay in version control so durable concepts can cite `review.md` and `ship.md` as provenance without copying them into the bundle.
 
-The exact leaf files can change. The principle should not: project memory, decisions, and workflow state must be explicit, indexed, reviewable, and readable by future sessions.
+The exact leaf files can change. The principle should not: project memory is a portable, typed, permissively consumed OKF bundle; workflow state remains separate; both are explicit, indexed, reviewable, and readable by future sessions.
 
 ## Workflow Lifecycle
 
 A typical workflow should move through these phases:
 
 1. **Intake:** capture user intent, constraints, risks, and success criteria.
-2. **Memory load:** read `docs/project.md` plus the steering, decisions, and runbooks indexes, then load relevant leaf files on demand.
+2. **Memory load:** read `docs/knowledge/index.md` plus `docs/knowledge/project.md`; for work in a package with its own bundle, also read `packages/<pkg>/docs/knowledge/index.md` plus `packages/<pkg>/docs/knowledge/project.md`; then load relevant collection indexes and concepts on demand.
 3. **Specification:** convert intent into a clear spec or task contract.
 4. **Planning:** decompose the work into dispatchable units.
 5. **Execution:** assign bounded tasks to sessions with explicit handoff packets.
@@ -297,11 +301,11 @@ The closeout should make the next workflow easier to start.
 
 - **Safe parallelism:** Parallel sessions need isolation and ownership through worktrees, branches, file ownership, task locks, or an explicit merge protocol. Parallel work is not complete until integrated and verified as a whole.
 
-- **Memory retrieval:** Sessions always receive `docs/project.md` plus the three compact indexes, then only the leaf memory relevant to the task.
+- **Memory retrieval:** Sessions always receive `docs/knowledge/index.md` plus `docs/knowledge/project.md`; active package work also receives that package bundle's index and project concept, then only the relevant collection indexes and concepts.
 
 - **Memory freshness:** Memory should include provenance, confidence, and review triggers when useful. Stale memory should be updated, superseded, or removed.
 
-- **ADR hygiene:** ADRs should be indexed in `docs/decisions/index.md`, searchable, and linked to related feature evidence. Superseded ADRs should stay available, but future sessions should see their status clearly.
+- **ADR hygiene:** ADRs should be typed `Architecture Decision`, indexed in `docs/knowledge/decisions/index.md`, searchable, and linked to related feature evidence. Superseded ADRs should stay available, but future sessions should see their status clearly.
 
 - **Conflict handling:** When project memory conflicts with an ADR, the accepted ADR should usually win until reviewed. When two ADRs conflict, the workflow should stop and escalate.
 

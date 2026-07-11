@@ -150,7 +150,25 @@ Cause-based alerts fire when nothing is wrong and miss failures you didn't predi
 Rules for every alert you create:
 
 1. **It must be actionable.** If the response is "ignore it, it self-heals", delete the alert.
-2. **It links to a runbook** — even three lines: what it means, first query to run, escalation path. Resolve scope before writing (see `memory-management` and the Workflow Artifacts map in `skills/context-engineering/SKILL.md`): use `docs/runbooks/<alert>.md` for repo-wide or cross-package operations, or `packages/<pkg>/docs/runbooks/<alert>.md` when one package owns the procedure and has package-local memory. Whenever a runbook is created or materially updated, create or update the corresponding `docs/runbooks/index.md` or `packages/<pkg>/docs/runbooks/index.md` with its trigger, one-line purpose, and relative path so agents can discover it without loading every procedure.
+2. **It links to a runbook** — even three lines: what it means, first query to run, escalation path. Resolve scope before writing (see `memory-management` and the Workflow Artifacts map in `skills/context-engineering/SKILL.md`): use `docs/knowledge/runbooks/<alert>.md` for repo-wide or cross-package operations, or `packages/<pkg>/docs/knowledge/runbooks/<alert>.md` when an independent package bundle owns the procedure. Follow the `memory-management` OKF profile before every durable write; bootstrap, migrate, or repair the bundle through that skill when its root index or core is incomplete. Write every runbook as an OKF concept beginning with `type: Playbook`, a title, and a one-sentence description. State why the procedure exists and cite the verified alert, incident, or feature evidence. On update, preserve unknown frontmatter keys and human-authored content. Create or update the corresponding `docs/knowledge/runbooks/index.md` or `packages/<pkg>/docs/knowledge/runbooks/index.md` with its trigger, description, and directory-relative path, and ensure the bundle root index still maps the collection. Reserved indexes have headings and links but no frontmatter.
+
+   ```markdown
+   ---
+   type: Playbook
+   title: Triage checkout error-rate alert
+   description: Diagnose and mitigate a sustained checkout error-rate breach.
+   tags: [oncall, checkout]
+   ---
+
+   # Why
+   Incident evidence shows this alert requires a repeatable response.
+
+   # Trigger
+   ...
+
+   # Citations
+   [1] [Verified incident evidence](https://example.com/incidents/123)
+   ```
 3. **It has a threshold and duration** justified by the SLO or by historical data, not by a guess.
 4. Use two severities only: **page** (user-facing, act now) and **ticket** (degradation, act this week). A third tier becomes noise that trains people to ignore everything.
 

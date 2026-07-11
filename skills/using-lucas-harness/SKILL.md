@@ -52,6 +52,19 @@ When the task is a whole ticket or request to drive from intake through ship —
 
 **Route vs. pick one skill:** Route when you're handed a ticket, issue, or feature request and want the lifecycle driven end-to-end. If you only need the single skill for what you're doing right now, use the Skill Discovery tree above instead. Don't route a plain question with no change to make — just answer it.
 
+### Step -1 — Load durable project context
+
+Before classifying a project-scoped request, follow the rules-file pointer and
+load `docs/knowledge/index.md` plus `docs/knowledge/project.md` when the OKF
+bundle exists. If the request targets a package with its own bundle, also load
+`packages/<pkg>/docs/knowledge/index.md` plus
+`packages/<pkg>/docs/knowledge/project.md`. Consult only the relevant collection
+indexes and concepts on demand. If legacy memory homes are detected instead,
+read them best-effort and surface the migration need, but make no file move
+before ticket classification and branch setup. Execute migration handling only
+when the current request authorizes that migration or as separately approved
+work; never create a second core in the meantime.
+
 ### Step 0 — Intake (what kind of input is this?)
 
 The input may be a scoped ticket *or* a raw description of intent. Decide which before classifying:
@@ -85,7 +98,7 @@ All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the fi
 
 - Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Improvement (refactor) → `improve/<x>` · Improvement (perf) → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
 - Epic → no single branch; each child feature gets its own `feature/<x>` (see below).
-- Migration guides live at global `docs/migrations/<name>.md`. Incident runbooks live at `<memory-root>/runbooks/<alert>.md` after resolving root-versus-package scope through `memory-management`. Neither belongs under `docs/specs/<slug>/`.
+- Migration guides live at global `docs/migrations/<name>.md`. Incident runbooks live at `<memory-root>/knowledge/runbooks/<alert>.md` after resolving root-versus-package scope through `memory-management`; they are OKF `Playbook` concepts. Neither belongs under `docs/specs/<slug>/`.
 - Candidate durable knowledge discovered during feature work lives in `docs/specs/<slug>/memory-delta.md` until the feature reaches `/ship`.
 
 ### Step 3 — Dispatch the calibrated flow
@@ -100,7 +113,7 @@ Every `/ship` performs memory closeout **sequentially after** the merged GO/NO-G
 - **Feature** — `/spec` (🔴 confirm spec) → `/build auto` (🔴 approve plan — the gate lives inside `build auto`) → **verify** if the ticket has runtime surface → `/ship` (🔴 GO/NO-GO). *Skips:* `/plan` and `/test` — both run inside `/build auto`.
 - **Task** — confirm the active parent feature has `docs/specs/<slug>/plan.md` with a pending task → `/build` (single task) → **verify** if it has runtime surface. The child rides the parent feature's `/ship`. If no parent spec/plan exists, reclassify the work as a Feature, Bug, or Chore before proceeding. *Skips:* spec, plan, `/test`, standalone ship. No human gate unless an escalation trigger fires.
 - **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → `/ship` (🔴 if the root cause was risky). *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop. (If it's live in production, route to **Incident** instead.)
-- **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: resolve memory scope, then write or update `<memory-root>/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
+- **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: resolve memory scope, then write or update `<memory-root>/knowledge/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` under the `memory-management` OKF contract, and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
 - **Migration · deprecation** — write the migration/deprecation guide to `docs/migrations/<name>.md` via `lucas-harness:deprecation-and-migration` (the guide *is* the spec) → roll out in phases (deprecate → warn → remove) → 🔴 **destructive/irreversible-step gate** before any data migration, public-API removal, or dropped column (anything not `git revert`-able) → **verify** each phase → `/review` → `/ship` with the guide + a `CHANGELOG.md` entry and the deprecation timeline communicated. *Skips:* `/spec`, `/plan` for the mechanics.
 - **Improvement · refactor** — ensure tests guard the current behavior first (add via `/test` if missing) → `/code-simplify` (it runs the test loop internally) → `/review` → ship-lite. *Skips:* spec, plan, a separate `/test` pass, and **verify** — unless the change turns out to alter behavior, in which case verify.
 - **Improvement · perf** — capture a baseline measurement → `lucas-harness:performance-optimization` (or `/webperf` for web surfaces) → **verify the measured improvement** (re-measure, don't assume) → `/review` → `/ship`. 🔴 if it touches a hot or risky path. *Skips:* spec, plan.
