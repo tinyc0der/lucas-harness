@@ -86,10 +86,11 @@ persona and must not run in the parallel fan-out.
 - **GO — promote verified knowledge.** If the active feature has
   `docs/specs/<slug>/memory-delta.md`, invoke `memory-management` once. Do not
   reject any candidate silently: record whether each is accepted, unverified, or
-  feature-local. Resolve each candidate's root-versus-package scope before choosing its canonical home.
-  Route accepted items within that memory root to `project.md`, `decisions/`,
-  `steering/`, or `runbooks/`; update every affected index; and include the
-  accepted set in the feature's single reviewable change/PR. Record each
+  feature-local. Resolve each candidate's root-versus-package scope before choosing its canonical home,
+  then target that scope's `knowledge/` OKF bundle. Route accepted items to
+  `project.md`, `decisions/`, `steering/`, or `runbooks/`; create or update typed
+  OKF concepts, preserve unknown frontmatter keys, update every affected index,
+  and include the accepted set in the feature's single reviewable change/PR. Record each
   candidate's disposition and target link in `memory-delta.md` so a later
   session cannot promote it twice.
 - **NO-GO — leave `memory-delta.md` unpromoted.** Record why the launch was

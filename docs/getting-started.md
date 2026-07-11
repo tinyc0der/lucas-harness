@@ -134,14 +134,14 @@ Load a reference when you need detailed patterns beyond what the skill covers.
 
 ## Project memory and workflow artifacts
 
-Skills and commands write markdown artifacts in three scopes. Durable project memory is global and indexed; the core workflow is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the filesystem-safe feature slug derived from the current git branch name; Define artifacts are global because they exist before a feature branch.
+Skills and commands write markdown artifacts in three scopes. Durable project memory is a portable [Open Knowledge Format v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) bundle under `docs/knowledge/`; the core workflow is **per-feature**, scoped under `docs/specs/<slug>/` where `<slug>` is the filesystem-safe feature slug derived from the current git branch name; Define artifacts are global because they exist before a feature branch.
 
 | Tier | Source | Artifact |
 |------|--------|----------|
-| Project memory (global) | memory-management | `docs/project.md` |
-| Project memory (global) | memory-management | `docs/steering/index.md`, `docs/steering/<domain>.md` |
-| Project memory (global) | documentation-and-adrs + memory-management | `docs/decisions/index.md`, `docs/decisions/NNNN-*.md` |
-| Project memory (global) | producing operational skill + memory-management | `docs/runbooks/index.md`, `docs/runbooks/<procedure>.md` |
+| Project memory (global OKF bundle) | memory-management | `docs/knowledge/index.md`, `docs/knowledge/project.md` |
+| Project memory (global OKF bundle) | memory-management | `docs/knowledge/steering/index.md`, `docs/knowledge/steering/<domain>.md` |
+| Project memory (global OKF bundle) | documentation-and-adrs + memory-management | `docs/knowledge/decisions/index.md`, `docs/knowledge/decisions/NNNN-*.md` |
+| Project memory (global OKF bundle) | producing operational skill + memory-management | `docs/knowledge/runbooks/index.md`, `docs/knowledge/runbooks/<procedure>.md` |
 | Define (global, pre-feature) | interview-me | `docs/intent/<topic>.md` |
 | Define (global, pre-feature) | idea-refine | `docs/ideas/<idea-name>.md` |
 | Per-feature | `/spec` | `docs/specs/<slug>/spec.md` |
@@ -154,7 +154,9 @@ Skills and commands write markdown artifacts in three scopes. Durable project me
 
 The Define-phase artifacts come *before* a branch exists, while project memory and cross-cutting artifacts outlive the feature that prompted them. The full map and slug-resolution rule live in the `context-engineering` skill. Treat workflow artifacts as living documents while work is in progress:
 
-In a monorepo with package-local memory, the durable homes may instead be rooted at `packages/<pkg>/docs/`; resolve root-versus-package scope before choosing `project.md`, `steering/`, `decisions/`, or `runbooks/`. Per-feature workflow artifacts remain in the repository-level `docs/specs/<slug>/`.
+At session start, load `docs/knowledge/index.md` and `docs/knowledge/project.md`; consult the steering, decisions, or runbooks index only when the task needs that collection. Every non-reserved bundle concept has OKF frontmatter with a non-empty `type`, while reserved `index.md` files provide heading-grouped links and descriptions.
+
+In a monorepo with package-local memory, create an independent bundle at `packages/<pkg>/docs/knowledge/`; resolve root-versus-package scope before choosing `project.md`, `steering/`, `decisions/`, or `runbooks/`. When working in that package, load its `packages/<pkg>/docs/knowledge/index.md` and `packages/<pkg>/docs/knowledge/project.md` in addition to the repository core. Per-feature workflow artifacts remain in repository `docs/specs/<slug>/`. Repositories using the former `docs/project.md` layout should follow [the OKF memory migration guide](migrations/okf-memory-bundle.md) rather than bootstrapping a duplicate bundle.
 
 - Keep them in version control during development so the human and the agent have a shared source of truth.
 - Update them when scope or decisions change.

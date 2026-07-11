@@ -35,9 +35,18 @@ ADRs capture the reasoning behind significant technical decisions. They're the h
 
 ### ADR Template
 
-Resolve scope before writing (see `memory-management` and the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). Store repo-wide or cross-package ADRs as `docs/decisions/NNNN-*.md`; in a monorepo with package-local memory, store a decision owned by exactly one package as `packages/<pkg>/docs/decisions/NNNN-*.md`. Use four-digit sequential numbering within the chosen scope. Whenever an ADR is created or its status changes, create or update the corresponding `docs/decisions/index.md` or `packages/<pkg>/docs/decisions/index.md` with its title, status, one-line summary, and relative path so agents can discover it without loading every decision.
+Resolve scope before writing (see `memory-management` and the Workflow Artifacts map in `skills/context-engineering/SKILL.md`). Store repo-wide or cross-package ADRs as `docs/knowledge/decisions/NNNN-*.md`; in a monorepo with package-local memory, store a decision owned by exactly one package as `packages/<pkg>/docs/knowledge/decisions/NNNN-*.md`. Use four-digit sequential numbering within the chosen OKF bundle. Whenever an ADR is created or its status changes, create or update the corresponding `docs/knowledge/decisions/index.md` or `packages/<pkg>/docs/knowledge/decisions/index.md` with its title, status, one-line description, and directory-relative path. The reserved index has headings and links but no frontmatter.
 
 ```markdown
+---
+type: Architecture Decision
+title: "ADR-0001: Use PostgreSQL for the primary database"
+description: Use PostgreSQL with Prisma for relational integrity, transactions, and managed hosting.
+tags: [architecture, database]
+status: accepted
+decision_date: 2025-01-15
+---
+
 # ADR-0001: Use PostgreSQL for primary database
 
 ## Status
@@ -88,6 +97,7 @@ PROPOSED → ACCEPTED → (SUPERSEDED or DEPRECATED)
 
 - **Don't delete old ADRs.** They capture historical context.
 - When a decision changes, write a new ADR that references and supersedes the old one.
+- Preserve unknown OKF frontmatter keys when updating an ADR. Keep `type`, `title`, and `description` present, and reflect lifecycle changes in both `status` and the decisions index.
 
 ## Inline Documentation
 
@@ -241,7 +251,8 @@ Keep the changelog at the repo root as `CHANGELOG.md` — one global, user-facin
 
 Special consideration for AI agent context:
 
-- **CLAUDE.md / rules files** — Document project conventions so agents follow them
+- **CLAUDE.md / rules files** — Point to the OKF bundle; do not duplicate project conventions there
+- **Project Guidance concepts** — Record durable conventions under `docs/knowledge/steering/`
 - **Spec files** — Keep specs updated so agents build the right thing
 - **ADRs** — Help agents understand why past decisions were made (prevents re-deciding)
 - **Inline gotchas** — Prevent agents from falling into known traps

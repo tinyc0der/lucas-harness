@@ -37,38 +37,24 @@ Structure context from most persistent to most transient:
 
 ### Level 1: Rules Files
 
-Create a rules file that persists across sessions. This is the highest-leverage context you can provide.
+Use the project's existing rules file as a thin discovery and control plane. Durable project facts belong in the OKF bundle owned by `memory-management`; the rules file points there and contains only tool-specific agent controls that have no durable project-knowledge home. **Link, don't copy or restate.**
+
+If the project has no memory bundle, invoke `memory-management` to bootstrap one rather than copying stack, command, convention, or architecture details into a rules file as a temporary substitute.
 
 **CLAUDE.md** (for Claude Code):
 ```markdown
-# Project: [Name]
+# Project agent instructions
 
-## Tech Stack
-- React 18, TypeScript 5, Vite, Tailwind CSS 4
-- Node.js 22, Express, PostgreSQL, Prisma
+## Project memory
+Durable knowledge is an OKF v0.1 bundle under `docs/knowledge/`. Read these at session start:
+- `docs/knowledge/index.md` — bundle map and OKF version
+- `docs/knowledge/project.md` — project contract, direction, constraints
 
-## Commands
-- Build: `npm run build`
-- Test: `npm test`
-- Lint: `npm run lint --fix`
-- Dev: `npm run dev`
-- Type check: `npx tsc --noEmit`
+Use the root index to load collection indexes and individual concepts on demand.
+Do not inline their contents here.
 
-## Code Conventions
-- Functional components with hooks (no class components)
-- Named exports (no default exports)
-- colocate tests next to source: `Button.tsx` → `Button.test.tsx`
-- Use `cn()` utility for conditional classNames
-- Error boundaries at route level
-
-## Boundaries
-- Never commit .env files or secrets
-- Never add dependencies without checking bundle size impact
-- Ask before modifying database schema
-- Always run tests before committing
-
-## Patterns
-[One short example of a well-written component in your style]
+## Tool-specific controls
+[Only instructions for this agent tool that cannot live in portable project memory.]
 ```
 
 **Equivalent files for other tools:**
@@ -93,16 +79,18 @@ source of truth for where every one of them lives — skills and commands refere
 
 ```
 docs/
-  project.md              ← memory-management       ┐ DURABLE PROJECT MEMORY — GLOBAL
-  steering/                                          │ conventions, risks, lessons
-    index.md              ← memory-management       │ (declarative, domain-organized)
-    <domain>.md           ← memory-management       │
-  decisions/                                         │ deliberate architecture choices
-    index.md              ← memory-management + documentation-and-adrs
-    NNNN-*.md             ← documentation-and-adrs  │
-  runbooks/                                          │ repeatable operational procedures
-    index.md              ← memory-management + producer skill
-    <procedure>.md        ← producing operational skill
+  knowledge/                                         ┐ DURABLE PROJECT MEMORY — OKF v0.1 BUNDLE
+    index.md            ← memory-management         │ bundle map + version declaration
+    project.md          ← memory-management         │ project contract
+    steering/                                        │ conventions, risks, lessons
+      index.md          ← memory-management         │ (declarative, domain-organized)
+      <domain>.md       ← memory-management         │ OKF `Project Guidance` concept
+    decisions/                                       │ deliberate architecture choices
+      index.md          ← memory-management + documentation-and-adrs
+      NNNN-*.md         ← documentation-and-adrs    │ OKF `Architecture Decision` concept
+    runbooks/                                        │ repeatable operational procedures
+      index.md          ← memory-management + producer skill
+      <procedure>.md    ← producing operational skill  # OKF `Playbook` concept
 
   intent/<topic>.md      ← interview-me            ┐ Define phase — GLOBAL, pre-feature
   ideas/<idea>.md        ← idea-refine             ┘ (no branch exists yet)
@@ -118,16 +106,23 @@ docs/
 CHANGELOG.md             ← documentation-and-adrs     # repo root, conventional location
 ```
 
-The always-loaded durable-memory entrypoints are `docs/project.md`,
-`docs/steering/index.md`, `docs/decisions/index.md`, and
-`docs/runbooks/index.md`; Architecture Decision Records use
-`docs/decisions/NNNN-*.md`. During a feature, proposed durable knowledge goes to
+The always-loaded durable-memory entrypoints are `docs/knowledge/index.md` and
+`docs/knowledge/project.md`. The root OKF index discovers the steering,
+decisions, and runbooks indexes, which load on demand; Architecture Decision Records use
+`docs/knowledge/decisions/NNNN-*.md`. The required collection maps are
+`docs/knowledge/steering/index.md`, `docs/knowledge/decisions/index.md`, and
+`docs/knowledge/runbooks/index.md`. During a feature, proposed durable knowledge goes to
 `docs/specs/<slug>/memory-delta.md`; `/ship` invokes `memory-management` to route
 verified items to the appropriate durable home.
 
-For monorepos with package-local memory, mirror the durable homes under
-`packages/<pkg>/docs/`; resolve root-versus-package scope before artifact type.
-Per-feature workflow state remains in the repository-level `docs/specs/<slug>/`.
+For monorepos with package-local memory, create an independent OKF bundle under
+`packages/<pkg>/docs/knowledge/`; resolve root-versus-package scope before artifact type.
+When work is scoped to that package, load both the repository
+`docs/knowledge/index.md` + `docs/knowledge/project.md` and the active package
+`packages/<pkg>/docs/knowledge/index.md` +
+`packages/<pkg>/docs/knowledge/project.md` before loading relevant collection
+indexes on demand. Per-feature workflow state remains in repository
+`docs/specs/<slug>/`.
 
 **Feature-slug resolution (branch-name mapping)** — for the per-feature tier only:
 - The slug is a **filesystem-safe single path segment** derived from the current git branch name.
@@ -335,18 +330,18 @@ This catches wrong directions before you've built on them. It's a 30-second inve
 
 | Anti-Pattern | Problem | Fix |
 |---|---|---|
-| Context starvation | Agent invents APIs, ignores conventions | Load rules file + relevant source files before each task |
+| Context starvation | Agent invents APIs, ignores conventions | Follow the rules-file pointer, load the OKF core, then relevant concepts and source files |
 | Context flooding | Agent loses focus when loaded with >5,000 lines of non-task-specific context. More files does not mean better output. | Include only what is relevant to the current task. Aim for <2,000 lines of focused context per task. |
 | Stale context | Agent references outdated patterns or deleted code | Start fresh sessions when context drifts |
 | Missing examples | Agent invents a new style instead of following yours | Include one example of the pattern to follow |
-| Implicit knowledge | Agent doesn't know project-specific rules | Write it down in rules files — if it's not written, it doesn't exist |
+| Implicit knowledge | Agent doesn't know project-specific rules | Route durable facts into the OKF bundle and keep the rules file as a pointer |
 | Silent confusion | Agent guesses when it should ask | Surface ambiguity explicitly using the confusion management patterns above |
 
 ## Common Rationalizations
 
 | Rationalization | Reality |
 |---|---|
-| "The agent should figure out the conventions" | It can't read your mind. Write a rules file — 10 minutes that saves hours. |
+| "The agent should figure out the conventions" | It can't read your mind. Record the convention in a typed, indexed project-guidance concept and link to memory from the rules file. |
 | "I'll just correct it when it goes wrong" | Prevention is cheaper than correction. Upfront context prevents drift. |
 | "More context is always better" | Research shows performance degrades with too many instructions. Be selective. |
 | "The context window is huge, I'll use it all" | Context window size ≠ attention budget. Focused context outperforms large context. |
@@ -364,7 +359,8 @@ This catches wrong directions before you've built on them. It's a 30-second inve
 
 After setting up context, confirm:
 
-- [ ] Rules file exists and covers tech stack, commands, conventions, and boundaries
-- [ ] Agent output follows the patterns shown in the rules file
+- [ ] Rules file points to the active OKF bundle and does not duplicate its stack, commands, conventions, or architecture
+- [ ] Repository and active-package bundle cores are loaded before feature work; collection concepts load only when relevant
+- [ ] Agent output follows the patterns in the loaded guidance concept or source example
 - [ ] Agent references actual project files and APIs (not hallucinated ones)
 - [ ] Context is refreshed when switching between major tasks
