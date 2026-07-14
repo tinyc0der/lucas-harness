@@ -29,7 +29,7 @@ bash /mnt/skills/user/idea-refine/scripts/idea-refine.sh
 
 ## Output
 
-The final output is a markdown one-pager saved to `docs/ideas/<idea-name>.md` (after user confirmation), containing:
+The final output is one markdown one-pager per coherent idea, saved to `docs/ideas/<idea-name>.md` (after user confirmation), containing:
 - Problem Statement
 - Recommended Direction
 - Key Assumptions
@@ -139,7 +139,17 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
+#### Artifact Granularity
+
+Treat the idea—not the conversation—as the unit of storage.
+
+- Keep directions in one file when they are alternative approaches to the same problem for the same target user and success criterion. Converge on one recommendation and capture rejected alternatives under "Not Doing."
+- Split directions into separate `docs/ideas/<idea-name>.md` files when they have different problem statements, target users, success criteria, or validation paths, or when the user chooses to preserve more than one as an independently viable idea.
+- Do not create an omnibus file merely because multiple ideas appeared in one discussion.
+- Do not turn downstream implementation tasks into additional idea files. Keep one coherent idea file and let its work fan out into multiple independent `docs/specs/<slug>/` directories after selection.
+
 Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a location of their choosing). Only save if they confirm — it's a global Define-phase artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
+When the discussion yields multiple independent ideas, propose one path per idea and ask once for confirmation before saving the set.
 
 ### Anti-patterns to Avoid
 
@@ -149,6 +159,7 @@ Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a lo
 - **Don't produce a plan without surfacing assumptions.** Untested assumptions are the #1 killer of good ideas.
 - **Don't over-engineer the process.** Three phases, each doing one thing well. Resist adding steps.
 - **Don't just list ideas — tell a story.** Each variation should have a reason it exists, not just be a bullet point.
+- **Don't use one file as a session transcript.** Keep variations of one coherent idea together; split independent ideas into separate artifacts.
 - **Don't ignore the codebase.** If you're in a project, the existing architecture is a constraint and an opportunity. Use it.
 
 ### Tone
@@ -177,4 +188,5 @@ After completing an ideation session:
 - [ ] Hidden assumptions are explicitly listed with validation strategies
 - [ ] A "Not Doing" list makes trade-offs explicit
 - [ ] The output is a concrete artifact (markdown one-pager), not just conversation
+- [ ] Each saved artifact contains one coherent idea; independent ideas are split and downstream work is left to per-feature spec directories
 - [ ] The user confirmed the final direction before any implementation work
