@@ -133,6 +133,14 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 - [Thing 2] — [reason]
 - [Thing 3] — [reason]
 
+## Idea Relationships and Sequence
+[Include only when this idea is related to, depends on, or enables another saved idea; omit lines that do not apply.]
+- **Related to:** [Adjacent Idea](adjacent-idea.md) — [how they connect without blocking each other]
+- **Depends on:** [Prerequisite Idea](prerequisite-idea.md) — [why it must come first]
+- **Enables:** [Later Idea](later-idea.md) — [what this unlocks]
+- **Validation order:** [what to validate first and why]
+- **Build order:** [prerequisite idea] → [dependent idea]
+
 ## Open Questions
 - [Question that needs answering before building]
 ```
@@ -148,6 +156,17 @@ Treat the idea—not the conversation—as the unit of storage.
 - Do not create an omnibus file merely because multiple ideas appeared in one discussion.
 - Do not turn downstream implementation tasks into additional idea files. Keep one coherent idea file and let its work fan out into multiple independent `docs/specs/<slug>/` directories after selection.
 
+#### Related and Dependent Ideas
+
+When separate idea artifacts are related or dependent:
+
+- Decide artifact granularity before adding relationships. Never create another artifact merely to record `Related to`; link only ideas that already qualify as separate coherent artifacts under the rules above.
+- Add "Idea Relationships and Sequence" to each affected artifact. Use same-directory relative links. For a non-blocking connection, add reciprocal `Related to` links and explain how the ideas connect. For a dependency, record `Depends on` in the dependent idea and the reciprocal `Enables` link in its prerequisite.
+- Do not infer validation or build order from `Related to`. Omit sequencing when the ideas can proceed independently.
+- Distinguish validation order from build order. Choose validation order by risk: test the assumption most likely to kill the chain first. When a prerequisite exists only to enable the downstream idea, mock it and validate downstream value before building it. After both ideas survive validation, build the prerequisite before the dependent idea.
+- Keep build order advisory in idea artifacts. Once promoted, the corresponding specs and plans own the authoritative implementation sequence.
+- Keep relationships in idea artifacts only when both sides are coherent ideas. Put implementation-only dependencies in specs or plans instead; if a dependency is circular or neither concept has value independently, keep them in one idea artifact.
+
 Ask the user if they'd like to save this to `docs/ideas/<idea-name>.md` (or a location of their choosing). Only save if they confirm — it's a global Define-phase artifact (see the Workflow Artifacts map in `skills/context-engineering/SKILL.md`).
 When the discussion yields multiple independent ideas, propose one path per idea and ask once for confirmation before saving the set.
 
@@ -160,6 +179,8 @@ When the discussion yields multiple independent ideas, propose one path per idea
 - **Don't over-engineer the process.** Three phases, each doing one thing well. Resist adding steps.
 - **Don't just list ideas — tell a story.** Each variation should have a reason it exists, not just be a bullet point.
 - **Don't use one file as a session transcript.** Keep variations of one coherent idea together; split independent ideas into separate artifacts.
+- **Don't invent dependencies between related ideas.** A shared user, domain, or source of evidence does not imply build order.
+- **Don't confuse validation order with build order.** Test whether the dependent idea is worth pursuing before building a prerequisite that exists only to enable it.
 - **Don't ignore the codebase.** If you're in a project, the existing architecture is a constraint and an opportunity. Use it.
 
 ### Tone
@@ -189,4 +210,5 @@ After completing an ideation session:
 - [ ] A "Not Doing" list makes trade-offs explicit
 - [ ] The output is a concrete artifact (markdown one-pager), not just conversation
 - [ ] Each saved artifact contains one coherent idea; independent ideas are split and downstream work is left to per-feature spec directories
+- [ ] Related and dependent idea artifacts use the correct reciprocal relative links; only dependencies define validation and build order
 - [ ] The user confirmed the final direction before any implementation work
