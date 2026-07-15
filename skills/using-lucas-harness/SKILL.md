@@ -82,8 +82,8 @@ Classify from the **content** of the ticket — judge what the work actually ent
 | Type | Signal |
 |------|--------|
 | **Epic** | Spans multiple shippable features/surfaces; "build an X system"; too big for one spec. |
-| **Feature** | One net-new user-facing capability worth a spec; a single shippable unit. |
-| **Task** | A small, well-defined slice of an already-specced feature; no spec of its own. |
+| **Feature** | A net-new or materially changed capability that needs a dedicated spec, unresolved product/design decisions, or multiple coordinated implementation tasks. |
+| **Task** | A bounded, well-defined change whose requirements and acceptance criteria are sufficient to implement without its own dedicated spec or planning phase. It may stand alone or be linked to a parent Feature. |
 | **Bug** | Something is broken, incorrect, or regressed; a reproducible defect (not currently a live outage). |
 | **Incident · hotfix** | Production is broken or degraded **right now**; urgency dominates ("outage", "down", "P0/P1", "prod regression"). |
 | **Migration · deprecation** | Removing, replacing, or sunsetting existing behavior/API/data — not adding or fixing ("deprecate", "migrate", "sunset", "remove X", "drop support for"). |
@@ -92,11 +92,13 @@ Classify from the **content** of the ticket — judge what the work actually ent
 | **Spike** | Open question or research ("investigate", "explore", "prototype to learn"); throwaway. |
 | **Chore** | Maintenance with no user-facing runtime change (deps bump, config, CI, tooling, version, formatting; docs-only counts here). |
 
+Use **Task** for work that is ready to build as written, not merely work expected to produce a small diff. A Task linked to a parent Feature is a **subtask**; subtask is a relationship, not a separate ticket type. If acceptance criteria or product/architecture decisions remain unresolved, use Feature even when the implementation looks small. Risk changes gates, not this classification, unless a specialized type such as Bug, Incident, or Migration applies.
+
 ### Step 2 — Set up the branch & artifacts
 
 All per-feature artifacts live at `docs/specs/<slug>/`, where `<slug>` is the filesystem-safe feature slug derived from the current git branch name (see the Workflow Artifacts map in the `context-engineering` skill). **Never write feature artifacts onto `main`/`master`, and never use the raw branch name as a path.** Create the branch *before* any artifact-producing step:
 
-- Feature → `feature/<x>` · Task → parent branch or `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Improvement (refactor) → `improve/<x>` · Improvement (perf) → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
+- Feature → `feature/<x>` · Task → parent branch when linked, otherwise `task/<x>` · Bug → `fix/<x>` · Incident → `hotfix/<x>` · Migration → `migrate/<x>` · Improvement (refactor) → `improve/<x>` · Improvement (perf) → `perf/<x>` · Spike → `spike/<x>` (throwaway) · Chore → `chore/<x>`
 - Epic → no single branch; each child feature gets its own `feature/<x>` (see below).
 - Migration guides live at global `docs/migrations/<name>.md`. Incident runbooks live at `<memory-root>/knowledge/runbooks/<alert>.md` after resolving root-versus-package scope through `memory-management`; they are OKF `Playbook` concepts. Neither belongs under `docs/specs/<slug>/`.
 - Candidate durable knowledge discovered during feature work lives in `docs/specs/<slug>/memory-delta.md` until the feature reaches `/ship`.
@@ -111,7 +113,7 @@ Every `/ship` performs memory closeout **sequentially after** the merged GO/NO-G
 
 - **Epic** — `lucas-harness:interview-me` → write intent to `docs/intent/<topic>.md` (reuse the intent doc if Step 0 already produced one — don't re-interview) → 🔴 **approve the split** into features → run the **Feature** flow below for each child feature on its own branch → finish with an integration **verify** across the assembled features. *Skips:* one mega spec/plan/ship.
 - **Feature** — `/spec` (🔴 confirm spec) → `/build auto` (🔴 approve plan — the gate lives inside `build auto`) → **verify** if the ticket has runtime surface → `/ship` (🔴 GO/NO-GO). *Skips:* `/plan` and `/test` — both run inside `/build auto`.
-- **Task** — confirm the active parent feature has `docs/specs/<slug>/plan.md` with a pending task → `/build` (single task) → **verify** if it has runtime surface. The child rides the parent feature's `/ship`. If no parent spec/plan exists, reclassify the work as a Feature, Bug, or Chore before proceeding. *Skips:* spec, plan, `/test`, standalone ship. No human gate unless an escalation trigger fires.
+- **Task** — confirm the ticket itself states explicit requirements and acceptance criteria; if it is linked to a parent Feature, also confirm `docs/specs/<slug>/plan.md` contains the pending task → `/build` (single bounded change) → **verify** if it has runtime surface. A linked Task (subtask) rides the parent Feature's `/ship`; a standalone Task uses ship-lite when eligible and full `/ship` otherwise. *Skips:* spec, plan, a separate `/test`, and review. No human gate unless full `/ship` or an escalation trigger requires one; never push past a blocking trigger merely to reach ship.
 - **Bug** — reproduce with a failing test via `lucas-harness:debugging-and-error-recovery` / `/test` (Prove-It; the failing test *is* the spec) → fix → **verify** (always — a bug is an observable defect) → `/review` if the root cause is risky → `/ship` (🔴 if the root cause was risky). *Skips:* spec, plan. Here `/test` is correct: the fix is hand-written and bypasses `/build`'s loop. (If it's live in production, route to **Incident** instead.)
 - **Incident · hotfix** — calibration is *inverted*: stabilize first, process after. 🔴 **Mitigate** — stop the bleeding via rollback or feature flag *before* diagnosing → **verify recovery** against production signals → root-cause as a **Bug** (failing test → fix) on the `hotfix/<x>` branch → ship the fix (🔴 expedited GO/NO-GO) → **postmortem**: resolve memory scope, then write or update `<memory-root>/knowledge/runbooks/<alert>.md` via `lucas-harness:observability-and-instrumentation` under the `memory-management` OKF contract, and file follow-ups. *Skips:* spec, plan — speed first; the postmortem is **mandatory**, not optional.
 - **Migration · deprecation** — write the migration/deprecation guide to `docs/migrations/<name>.md` via `lucas-harness:deprecation-and-migration` (the guide *is* the spec) → roll out in phases (deprecate → warn → remove) → 🔴 **destructive/irreversible-step gate** before any data migration, public-API removal, or dropped column (anything not `git revert`-able) → **verify** each phase → `/review` → `/ship` with the guide + a `CHANGELOG.md` entry and the deprecation timeline communicated. *Skips:* `/spec`, `/plan` for the mechanics.
@@ -142,6 +144,8 @@ Run autonomously between steps. Stop for a human **only** at: the 🔴 gates abo
 | Rationalization | Reality |
 |---|---|
 | "The user typed `bug:`, so it's a Bug." | A type label is a hint, not authority. Classify from what the work actually entails — a "bug" that adds a capability is a Feature. |
+| "The diff should be tiny, so it's a Task." | Diff size is not the boundary. A Task must be ready to build from explicit acceptance criteria; unresolved product or architecture decisions make it a Feature. |
+| "A standalone change cannot be a Task." | Parentage is relationship metadata. A bounded, ready-to-build change can stand alone; when linked to a parent Feature, it is a subtask and rides the parent ship. |
 | "I'll just run the full Feature flow to be safe." | Over-calibrating burns the user's time on spec/plan/ship steps a Chore or Task doesn't need. Right-sizing is the whole point. |
 | "This vague goal is close enough to spec directly." | Raw intent that spans features or has no concrete change must go through Define first, or you'll spec the wrong thing. |
 | "I can skip the human gate, the change looks safe." | The 🔴 gates and escalation triggers are non-negotiable. Auth, payments, destructive, and deploy steps stop for a human regardless of how safe they look. |
@@ -153,6 +157,7 @@ Before considering the routing complete, confirm:
 
 - [ ] The input was triaged (non-actionable / raw intent / scoped change) before classifying.
 - [ ] A single classification was stated in one line, with the user given a chance to override.
+- [ ] A Task was ready to build from explicit acceptance criteria, and its standalone-versus-linked shipping path was selected.
 - [ ] A correctly-named branch exists before any feature artifact was written.
 - [ ] Only the steps the chosen type calls for were run — skipped steps were genuinely skipped, not silently dropped.
 - [ ] Every 🔴 gate and escalation trigger reached was surfaced to a human.
