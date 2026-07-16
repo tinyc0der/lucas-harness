@@ -142,7 +142,12 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 - **Build order:** [prerequisite idea] → [dependent idea]
 
 ## Open Questions
-- [Question that needs answering before building]
+For each unresolved decision, provide 2-3 mutually exclusive options. Put the recommended option first, suffix its label with `(Recommended)`, and give one short tradeoff sentence per option. If no unresolved decisions remain, write `- None.` instead.
+
+1. **[Question that needs answering before building?]**
+   - **[Preferred option] (Recommended)** — [Why this is the best default]
+   - **[Alternative option]** — [Impact or tradeoff]
+   - **[Alternative option]** — [Impact or tradeoff]
 ```
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.

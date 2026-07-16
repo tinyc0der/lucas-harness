@@ -113,7 +113,12 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 [How we'll know this is done — specific, testable conditions]
 
 ## Open Questions
-[Anything unresolved that needs human input]
+For each unresolved decision, provide 2-3 mutually exclusive options. Put the recommended option first, suffix its label with `(Recommended)`, and give one short tradeoff sentence per option. If no unresolved decisions remain, write `- None.` instead.
+
+1. **[Question needing human input?]**
+   - **[Preferred option] (Recommended)** — [Why this is the best default]
+   - **[Alternative option]** — [Impact or tradeoff]
+   - **[Alternative option]** — [Impact or tradeoff]
 ```
 
 **Where the spec lives.** Save it to `docs/specs/<slug>/spec.md`, one directory per feature, where `<slug>` is the filesystem-safe feature slug derived from the current git branch name. Do not use the raw branch name as a path: branch `origin/prioritize-self-improvement` resolves to `docs/specs/prioritize-self-improvement/spec.md`, not `docs/specs/origin/prioritize-self-improvement/spec.md`. This is what lets multiple features have specs in flight at once instead of contending for a single root file. See the Workflow Artifacts map in `skills/context-engineering/SKILL.md` (`context-engineering`) for the full layout and slug-resolution rule; the plan (Phase 2) and task ledger (Phase 3) land alongside it as `docs/specs/<slug>/plan.md`.

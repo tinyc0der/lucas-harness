@@ -120,10 +120,18 @@ SMS-first (not app-first) is likely the right channel. A text saying "Hey, want 
 - **Analytics dashboards** — the owner is in the kitchen. Build reporting that's passive (weekly text summary) not active (log in and look at charts).
 
 ## Open Questions
-- What's the legal/compliance landscape for SMS marketing to restaurant customers?
-- How do you handle menu/price changes for "usual" orders?
-- Is there a way to bootstrap the regular customer list from existing POS data instead of manual entry?
-- What's the pricing model? Per-order fee? Monthly subscription?
+1. **Which single consent-acquisition path should the MVP support first?**
+   - **Capture explicit SMS opt-in at checkout (Recommended)** — Creates a clear consent trail while keeping the first release operationally simple.
+   - **Import existing marketing-consent records from the POS** — Speeds onboarding but depends on reliable consent data and POS integrations.
+   - **Ask restaurants to collect consent manually** — Avoids an integration but creates inconsistent records and staff overhead.
+
+2. **How should the MVP handle menu or price changes for a customer's usual order?**
+   - **Require restaurant confirmation before sending the reorder prompt (Recommended)** — Prevents stale offers with a small recurring staff step.
+   - **Send the saved order unchanged and resolve differences after confirmation** — Minimizes restaurant work but risks surprising customers.
+
+3. **What pricing model should the MVP test?**
+   - **Flat monthly subscription (Recommended)** — Keeps billing predictable and aligns with reducing marketplace fees.
+   - **Per-order fee** — Lowers the barrier to start but recreates some marketplace-style variable costs.
 
 ---
 
