@@ -184,7 +184,12 @@ Save the plan to `docs/specs/<slug>/plan.md`, one directory per feature, where `
 | [Risk] | [High/Med/Low] | [Strategy] |
 
 ## Open Questions
-- [Question needing human input]
+For each unresolved decision, provide 2-3 mutually exclusive options. Put the recommended option first, suffix its label with `(Recommended)`, and give one short tradeoff sentence per option. If no unresolved decisions remain, write `- None.` instead.
+
+1. **[Question needing human input?]**
+   - **[Preferred option] (Recommended)** — [Why this is the best default]
+   - **[Alternative option]** — [Impact or tradeoff]
+   - **[Alternative option]** — [Impact or tradeoff]
 ```
 
 ## Parallelization Opportunities

@@ -70,7 +70,7 @@ When the user invokes this skill with an idea (`$ARGUMENTS`), guide them through
 
    Use the `AskUserQuestion` tool to gather this input. Do NOT proceed until you understand who this is for and what success looks like.
 
-3. **Generate 5-8 idea variations** using these lenses:
+3. **Generate 3 idea variations by default** using the strongest-fitting lenses below. Add a fourth or fifth only when it introduces a genuinely different direction; never pad the list or exceed five.
    - **Inversion:** "What if we did the opposite?"
    - **Constraint removal:** "What if budget/time/tech weren't factors?"
    - **Audience shift:** "What if this were for [different user]?"
@@ -79,7 +79,7 @@ When the user invokes this skill with an idea (`$ARGUMENTS`), guide them through
    - **10x version:** "What would this look like at massive scale?"
    - **Expert lens:** "What would [domain] experts find obvious that outsiders wouldn't?"
 
-   Push beyond what the user initially asked for. Create products people don't know they need yet.
+   Choose lenses selectively rather than producing one variation per lens. Push beyond what the user initially asked for, but favor depth and contrast over volume.
 
 **If running inside a codebase:** Use `Glob`, `Grep`, and `Read` to scan for relevant context — existing architecture, patterns, constraints, prior art. Ground your variations in what actually exists. Reference specific files and patterns when relevant.
 
@@ -142,7 +142,12 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 - **Build order:** [prerequisite idea] → [dependent idea]
 
 ## Open Questions
-- [Question that needs answering before building]
+For each unresolved decision, provide 2-3 mutually exclusive options. Put the recommended option first, suffix its label with `(Recommended)`, and give one short tradeoff sentence per option. If no unresolved decisions remain, write `- None.` instead.
+
+1. **[Question that needs answering before building?]**
+   - **[Preferred option] (Recommended)** — [Why this is the best default]
+   - **[Alternative option]** — [Impact or tradeoff]
+   - **[Alternative option]** — [Impact or tradeoff]
 ```
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
@@ -172,7 +177,7 @@ When the discussion yields multiple independent ideas, propose one path per idea
 
 ### Anti-patterns to Avoid
 
-- **Don't generate 20+ ideas.** Quality over quantity. 5-8 well-considered variations beat 20 shallow ones.
+- **Don't generate more than 5 ideas.** Default to 3; add another only when it changes the direction materially. Three well-considered variations beat a padded list.
 - **Don't be a yes-machine.** Push back on weak ideas with specificity and kindness.
 - **Don't skip "who is this for."** Every good idea starts with a person and their problem.
 - **Don't produce a plan without surfacing assumptions.** Untested assumptions are the #1 killer of good ideas.
@@ -191,7 +196,7 @@ Read `examples.md` in this skill directory for examples of what great ideation s
 
 ## Red Flags
 
-- Generating 20+ shallow variations instead of 5-8 considered ones
+- Generating more than 5 variations, or padding beyond 3 without a genuinely distinct direction
 - Skipping the "who is this for" question
 - No assumptions surfaced before committing to a direction
 - Yes-machining weak ideas instead of pushing back with specificity
@@ -205,7 +210,7 @@ After completing an ideation session:
 
 - [ ] A clear "How Might We" problem statement exists
 - [ ] The target user and success criteria are defined
-- [ ] Multiple directions were explored, not just the first idea
+- [ ] Three focused variations were explored; any fourth or fifth adds a genuinely distinct direction
 - [ ] Hidden assumptions are explicitly listed with validation strategies
 - [ ] A "Not Doing" list makes trade-offs explicit
 - [ ] The output is a concrete artifact (markdown one-pager), not just conversation

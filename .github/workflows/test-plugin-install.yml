@@ -20,6 +20,9 @@ jobs:
       - name: Validate all skills
         run: node scripts/validate-skills.js
 
+      - name: Test skill validation rules
+        run: node --test scripts/validate-skills.test.js
+
       - name: Validate memory artifact contract
         run: node --test scripts/validate-memory-contract.test.js
 
