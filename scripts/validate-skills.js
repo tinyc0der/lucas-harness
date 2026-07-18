@@ -45,6 +45,7 @@ const REQUIRED_SECTIONS = [
 // Every entry must have a documented reason.
 const SECTION_EXEMPT_SKILLS = {
   'using-lucas-harness': 'Meta-skill — orchestrates other skills; When-to-Use and Verification are not applicable to a routing document.',
+  'lead-orchestrator':    'Meta-skill — composes Lucas lifecycle routing with Orca coordination and uses workflow-specific headings.',
   'idea-refine':        'Legacy structure predating skill-anatomy.md — uses How-It-Works/Usage/Anti-patterns instead of standard headings. Tracked for conformance in https://github.com/tinyc0der/lucas-harness/issues',
   'orchestration':      'External tool-reference skill pulled verbatim from stablyai/orca; documents the `orca orchestration` CLI rather than a lucas-harness process, so it does not follow the skill-anatomy section template. Kept in sync with upstream, so it must not be reformatted.',
 };
