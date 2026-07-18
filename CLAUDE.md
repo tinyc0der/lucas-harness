@@ -22,7 +22,7 @@ docs/         → Setup guides for different tools
 **Review:** code-review-and-quality, code-simplification, security-and-hardening, performance-optimization
 **Ship:** git-workflow-and-versioning, create-pull-request, ci-cd-and-automation, deprecation-and-migration, documentation-and-adrs, observability-and-instrumentation, shipping-and-launch, memory-management
 
-**Route (meta):** using-lucas-harness — discovers the right skill for a single activity, and for a whole incoming ticket classifies its type and dispatches the calibrated flow across the phases above (see its "Routing an Incoming Ticket" section; activates by description, no slash command)
+**Route (meta):** using-lucas-harness — discovers the right skill for a single activity, and for a whole incoming ticket classifies its type and dispatches the calibrated flow across the phases above (see its "Routing an Incoming Ticket" section; activates by description, no slash command); lead-orchestrator — keeps parent accountability while controlled child agents execute Lucas steps through Orca
 
 ## Upstream Merge Guide
 

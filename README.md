@@ -151,15 +151,16 @@ Skills are plain Markdown - they work with any agent that accepts system prompts
 
 ---
 
-## All 28 Skills
+## All 29 Skills
 
-The commands above are entry points. The pack includes 28 skills total — 27 lifecycle/support skills plus the `using-lucas-harness` meta-skill. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
+The commands above are entry points. The pack includes 29 skills total — 27 lifecycle/support skills plus the `using-lucas-harness` and `lead-orchestrator` meta-skills. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
 
-### Meta - Discover which skill applies
+### Meta - Route and coordinate work
 
 | Skill | What It Does | Use When |
 |-------|-------------|----------|
 | [using-lucas-harness](skills/using-lucas-harness/SKILL.md) | Maps incoming work to the right skill workflow and defines shared operating rules | Starting a session or deciding which skill applies |
+| [lead-orchestrator](skills/lead-orchestrator/SKILL.md) | Retains parent accountability while coordinating controlled child agents through Lucas and Orca | Delegating bounded steps, supervising a task DAG, or synthesizing returned agent work |
 
 ### Define - Clarify what to build
 
