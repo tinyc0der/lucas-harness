@@ -88,7 +88,7 @@ Confirm the lead chooses the correct behavior in each scenario:
 
 1. "Give this to another agent and stop" -> full handoff; no task or wait.
 2. "Run this settled test suite and bring back the result" -> awaited delegation; no routine terminal reads.
-3. "Use two agents, supervise them, and return the merged result" -> injected supervised dispatches and lead acceptance.
+3. "Use two agents, supervise them, and return the merged result" -> injected interactive-coordination dispatches and lead acceptance.
 4. "Fix this one-line typo" -> local execution unless delegation is explicitly required.
 5. "Have one agent review and another fix" -> separate review and write ownership; the reviewer cannot edit.
 6. "The worker timed out but its terminal is active" -> inspect task state, use terminal output only if diagnosis is needed, and do not duplicate work.

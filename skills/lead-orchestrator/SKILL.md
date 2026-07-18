@@ -1,6 +1,6 @@
 ---
 name: lead-orchestrator
-description: Lead multi-agent engineering work by composing Lucas Harness lifecycle routing with Orca CLI worktree/terminal control and Orca orchestration task provenance. Use when Codex must remain accountable while controlled child agents execute bounded subtasks, return results, participate in a dependency DAG, ask questions, or provide independent reviews. Trigger for requests to act as a lead orchestrator, run a Lucas workflow through agents, fire a child and wait for its result, supervise or monitor agents, coordinate parallel workers, manage decision gates, or synthesize returned work. Distinguish local execution, awaited delegation, supervised orchestration, and full ownership handoff.
+description: Lead multi-agent engineering work by composing Lucas Harness lifecycle routing with Orca CLI worktree/terminal control and Orca orchestration task provenance. Use when Codex must remain accountable while controlled child agents execute bounded subtasks, return results, participate in a dependency DAG, ask questions, or provide independent reviews. Trigger for requests to act as a lead orchestrator, run a Lucas workflow through agents, fire a child and wait for its result, supervise or monitor agents, coordinate parallel workers, manage decision gates, or synthesize returned work. Distinguish local execution, awaited delegation, interactive coordination, and full ownership handoff.
 ---
 
 # Lead Orchestrator
@@ -36,13 +36,13 @@ Choose the mode after Lucas Harness determines which lifecycle step must run:
 | Local execution | Delegation adds no meaningful parallelism, isolation, or independent judgment | Execute the Lucas step in the lead session |
 | Full handoff | Another agent takes ownership of the remaining workflow and no result must return to this lead | Use `orca-cli`, deliver the brief, create no orchestration task, and stop monitoring |
 | Awaited delegation | A bounded step has settled inputs and acceptance, its result must return, and no intermediate coordination is expected | Create a task, inject the dispatch, block on orchestration events, then validate `worker_done` evidence |
-| Supervised orchestration | The step has ambiguity, dependencies, risk, multiple workers, likely questions, gates, integration, or remediation | Create tracked tasks and actively coordinate the event-driven workflow |
+| Interactive coordination | The step has ambiguity, dependencies, risk, multiple workers, likely questions, gates, integration, or remediation | Create tracked tasks and react to authoritative events, questions, dependencies, gates, and remediation without continuously monitoring worker activity |
 
-Treat awaited delegation as a low-touch operating submode of Orca supervised orchestration, not as a new Orca lifecycle. It still requires task/dispatch provenance and a valid `worker_done`; it removes routine monitoring.
+Treat awaited delegation as the quiet path of controlled Orca orchestration and interactive coordination as the event-reactive path. Both require task/dispatch provenance and a valid `worker_done`; neither permits continuous worker monitoring.
 
 Do not use full handoff for a required internal Lucas step when the parent workflow needs its result. Full handoff transfers the remaining Lucas responsibility to the new owner. Do not call plain terminal delegation "orchestrated."
 
-Read [lucas-mode-map.md](references/lucas-mode-map.md) when routing a whole ticket or deciding how to execute a Lucas phase. Upgrade awaited delegation to supervised orchestration when a child asks a question, escalates, discovers broader scope, or requires remediation.
+Read [lucas-mode-map.md](references/lucas-mode-map.md) when routing a whole ticket or deciding how to execute a Lucas phase. Upgrade awaited delegation to interactive coordination when a child asks a question, escalates, discovers broader scope, or requires remediation.
 
 ## Run the lead workflow
 
@@ -85,14 +85,14 @@ Assign non-overlapping write scopes. Use review-only tasks for independent criti
 - Use a separate worktree only for isolated work that can start from its selected Git base. Decide Orca lineage separately from Git base.
 - Prefer Orca's agent-first worktree creation when ordinary agent startup is sufficient.
 - Wait for agent TUI readiness with an explicit timeout when prompt delivery could race startup.
-- Create an Orca task and use injected dispatch for every awaited or supervised child. Verify task and dispatch state before describing the worker as orchestrated.
+- Create an Orca task and use injected dispatch for every awaited or interactively coordinated child. Verify task and dispatch state before describing the worker as orchestrated.
 - Address one live handle per child. Re-resolve a stale handle and continue with the replacement only.
 
-### 5. Wait or supervise through orchestration events
+### 5. Wait or coordinate through orchestration events
 
 - Use `orchestration check --wait` for `worker_done`, `escalation`, and `decision_gate`; use task and dispatch views for state.
 - In awaited delegation, dispatch and block without routine polling, terminal reads, or requested heartbeats. Validate the returned evidence when `worker_done` arrives.
-- In supervised orchestration, use the ready-task view as external memory, dispatch independent waves up to capacity, answer blocking `ask` messages through `reply`, and release dependents after authoritative completion.
+- In interactive coordination, use the ready-task view as external memory, dispatch independent waves up to capacity, answer blocking `ask` messages through `reply`, and release dependents after authoritative completion.
 - Allow children to send multiple meaningful `status` messages, requested dispatch-scoped heartbeats, sequential blocking `ask` messages, and rare escalations before completion.
 - Require exactly one dispatch-scoped `worker_done` from the child's own pane on success or failure. After it, require the child to end its turn and send no further messages for that dispatch.
 - Use orchestration `reply`, not `terminal send`, to answer a child's tracked question.
@@ -115,7 +115,7 @@ Assign non-overlapping write scopes. Use review-only tasks for independent criti
 - Use orchestration messages for communication, task/dispatch views for state, `terminal wait --for tui-idle` for readiness, and `worker_done` for completion authority.
 - In full handoff, do not read the terminal after prompt delivery except to prevent losing the initial prompt.
 - In awaited delegation, read the terminal only during timeout or delivery recovery.
-- In supervised orchestration, read bounded terminal output only to diagnose startup failure, a crash, a stuck worker, a bare shell that cannot message, or an escalation requiring output evidence.
+- In interactive coordination, read bounded terminal output only to diagnose startup failure, a crash, a stuck worker, a bare shell that cannot message, or an escalation requiring output evidence.
 - Never accept terminal text such as "done" as completion. Never use `terminal send` in place of orchestration reply for tracked coordination.
 
 ## Recover without losing authority
