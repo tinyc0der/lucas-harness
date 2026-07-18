@@ -42,7 +42,7 @@ Treat awaited delegation as a low-touch operating submode of Orca supervised orc
 
 Do not use full handoff for a required internal Lucas step when the parent workflow needs its result. Full handoff transfers the remaining Lucas responsibility to the new owner. Do not call plain terminal delegation "orchestrated."
 
-Read [lead-orchestrator-lucas-mode-map.md](../../references/lead-orchestrator-lucas-mode-map.md) when routing a whole ticket or deciding how to execute a Lucas phase. Upgrade awaited delegation to supervised orchestration when a child asks a question, escalates, discovers broader scope, or requires remediation.
+Read [lucas-mode-map.md](references/lucas-mode-map.md) when routing a whole ticket or deciding how to execute a Lucas phase. Upgrade awaited delegation to supervised orchestration when a child asks a question, escalates, discovers broader scope, or requires remediation.
 
 ## Run the lead workflow
 
@@ -77,7 +77,7 @@ Give every child one independently verifiable deliverable. Define:
 - acceptance checks and evidence to return;
 - escalation path, messaging policy, and completion contract.
 
-Assign non-overlapping write scopes. Use review-only tasks for independent critique and state whether the child may edit. Read [lead-orchestrator-task-contracts.md](../../references/lead-orchestrator-task-contracts.md) for reusable packets.
+Assign non-overlapping write scopes. Use review-only tasks for independent critique and state whether the child may edit. Read [task-contracts.md](references/task-contracts.md) for reusable packets.
 
 ### 4. Place and dispatch controlled children
 
