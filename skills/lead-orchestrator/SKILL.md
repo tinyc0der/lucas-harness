@@ -16,7 +16,7 @@ Load and follow these skills rather than copying or re-deriving their detailed p
 3. Load `orchestration` when coordination state, returned results, a DAG, ask/reply, gates, or completion tracking matters.
 4. Load any lifecycle skill selected by Lucas Harness for the work being performed.
 
-Treat this skill as the authority and coordination layer. Let the composing skills own exact CLI syntax and engineering procedures. If a required skill or Orca runtime is unavailable, state the limitation; do not imitate Orca provenance with generic agents or plain terminal prompts.
+Treat this skill as the authority and coordination layer. Let the composing skills own exact CLI syntax and engineering procedures. For lead-managed dispatches, the quiet-wait policy below governs wait cadence, timeout handling, heartbeat handling, terminal diagnosis, and user-visible updates even when a composing skill gives more general coordination guidance. If a required skill or Orca runtime is unavailable, state the limitation; do not imitate Orca provenance with generic agents or plain terminal prompts.
 
 ## Preserve the authority model
 
@@ -90,13 +90,15 @@ Assign non-overlapping write scopes. Use review-only tasks for independent criti
 
 ### 5. Wait or coordinate through orchestration events
 
-- Use `orchestration check --wait` for `worker_done`, `escalation`, and `decision_gate`; use task and dispatch views for state.
+- Prefer one long, bounded `orca orchestration check --wait --types worker_done,escalation,decision_gate --timeout-ms 300000 --json` when the host permits that duration. Always keep a finite timeout.
+- When the host requires interaction or user visibility within 60 seconds, use quiet rolling waits of at most 60 seconds. Renew the event wait without routine task-state polling, terminal reads, retries, or user-facing timeout updates between windows.
+- Keep routine `heartbeat` and `status` messages out of the primary completion wait unless task-boundary status is explicitly needed. Orchestration messages are durable and queued, so continuous checking is not required to avoid losing them.
 - In awaited delegation, dispatch and block without routine polling, terminal reads, or requested heartbeats. Validate the returned evidence when `worker_done` arrives.
 - In interactive coordination, use the ready-task view as external memory, dispatch independent waves up to capacity, answer blocking `ask` messages through `reply`, and release dependents after authoritative completion.
-- Allow children to send multiple meaningful `status` messages, requested dispatch-scoped heartbeats, sequential blocking `ask` messages, and rare escalations before completion.
+- Allow children to send multiple meaningful `status` messages, requested dispatch-scoped heartbeats, sequential blocking `ask` messages, and rare escalations before completion. Treat heartbeats as liveness only and do not reply unless the message contains an actual question or escalation.
 - Require exactly one dispatch-scoped `worker_done` from the child's own pane on success or failure. After it, require the child to end its turn and send no further messages for that dispatch.
 - Use orchestration `reply`, not `terminal send`, to answer a child's tracked question.
-- Treat a wait timeout as a checkpoint, heartbeats and terminal activity as liveness, and only valid `worker_done` as dispatch completion.
+- Treat a wait timeout as a quiet checkpoint, not a worker failure or an automatic reason to inspect state. Only valid `worker_done` establishes dispatch completion.
 - Inspect returned evidence and changed files independently. Lifecycle completion does not prove parent acceptance.
 
 ### 6. Integrate, challenge, and close
@@ -114,14 +116,14 @@ Assign non-overlapping write scopes. Use review-only tasks for independent criti
 - Do not make `orca terminal read` part of the normal coordination loop.
 - Use orchestration messages for communication, task/dispatch views for state, `terminal wait --for tui-idle` for readiness, and `worker_done` for completion authority.
 - In full handoff, do not read the terminal after prompt delivery except to prevent losing the initial prompt.
-- In awaited delegation, read the terminal only during timeout or delivery recovery.
+- In awaited delegation, read the terminal only during delivery recovery or after repeated silence combined with missing or stale liveness evidence.
 - In interactive coordination, read bounded terminal output only to diagnose startup failure, a crash, a stuck worker, a bare shell that cannot message, or an escalation requiring output evidence.
 - Never accept terminal text such as "done" as completion. Never use `terminal send` in place of orchestration reply for tracked coordination.
 
 ## Recover without losing authority
 
 - On `terminal_handle_stale`, list the target worktree and use only the replacement handle.
-- After a wait timeout, inspect task state first, then terminal liveness only when needed. Do not duplicate, kill, or retry a worker that is still active.
+- A wait timeout alone triggers no recovery. After repeated silence plus missing or stale liveness evidence, inspect task state first, then terminal liveness only when needed. Do not duplicate, kill, or retry a worker that is still active.
 - Honor Orca's circuit breaker after repeated dispatch failures; escalate rather than loop.
 - Never reset runtime-global orchestration state while unrelated coordination may be active unless the user explicitly authorizes abandoning it.
 - If work ran outside Orca orchestration, say so. Revalidate through a fresh injected dispatch before calling that work orchestrated.
@@ -129,4 +131,4 @@ Assign non-overlapping write scopes. Use review-only tasks for independent criti
 
 ## Keep the lead visible to the user
 
-Provide concise progress updates during long work without forwarding raw worker chatter. Surface assumptions, meaningful phase changes, human gates, blockers, and evidence. The lead—not a child—speaks for the combined result.
+Provide concise progress updates during long work without forwarding raw worker chatter. Do not surface routine wait renewals, timeouts, heartbeats, or status messages. Surface assumptions, meaningful phase changes, human gates, blockers, and evidence. The lead—not a child—speaks for the combined result.
